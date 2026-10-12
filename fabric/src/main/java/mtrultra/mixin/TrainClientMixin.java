@@ -1,6 +1,7 @@
 package mtrultra.mixin;
 
 import mtrultra.MtrUltraConfig;
+import mtrultra.MtrUltraStats;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
@@ -79,6 +80,7 @@ public abstract class TrainClientMixin {
 		final double dy = carY - mtrultra$cameraPos.y;
 		final double dz = carZ - mtrultra$cameraPos.z;
 		if (dx * dx + dy * dy + dz * dz > dist * dist) {
+			MtrUltraStats.carsCulled.incrementAndGet();
 			ci.cancel();
 		}
 	}

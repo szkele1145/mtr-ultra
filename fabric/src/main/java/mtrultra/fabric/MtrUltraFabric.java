@@ -11,5 +11,6 @@ public class MtrUltraFabric implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		MtrUltraMod.onInitialize();
+		MtrUltraCommands.register();
 	}
 }

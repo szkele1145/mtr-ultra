@@ -2,6 +2,7 @@ package mtrultra.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import mtrultra.MtrUltraConfig;
+import mtrultra.MtrUltraStats;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -39,6 +40,10 @@ public abstract class TrainMixin {
 			return original;
 		}
 		// 开门窗口外直接短路（等价于原逻辑在 doorValue==0 时的结果）
-		return (doorTarget || doorValue > 0) && original;
+		if (doorTarget || doorValue > 0) {
+			return original;
+		}
+		MtrUltraStats.doorScanSkipped.incrementAndGet();
+		return false;
 	}
 }
