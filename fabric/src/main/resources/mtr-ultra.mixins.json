@@ -1,0 +1,21 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "mtrultra.mixin",
+	"compatibilityLevel": "JAVA_17",
+	"refmap": "mtr-ultra.refmap.json",
+	"mixins": [
+		"TrainServerMixin",
+		"TrainServerTickScaleMixin",
+		"TrainMixin",
+		"RailwayDataMixin"
+	],
+	"client": [
+		"TrainClientMixin",
+		"RenderTrainsMixin",
+		"RenderTrainsAccessor"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

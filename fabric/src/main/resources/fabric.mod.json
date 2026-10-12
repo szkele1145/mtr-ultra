@@ -1,0 +1,34 @@
+{
+	"schemaVersion": 1,
+	"id": "mtr-ultra",
+	"version": "${version}",
+	"name": "MTR-Ultra",
+	"description": "Aggressive performance optimizations for Minecraft Transit Railway large worlds - simulation LOD, render culling, schedule throttling | MTR 大存档激进性能优化附属",
+	"authors": [
+		"szkele1145"
+	],
+	"contact": {
+		"homepage": "https://github.com/szkele1145/mtr-ultra",
+		"sources": "https://github.com/szkele1145/mtr-ultra"
+	},
+	"license": "MIT",
+	"icon": "icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"mtrultra.fabric.MtrUltraFabric"
+		],
+		"client": [
+			"mtrultra.fabric.MtrUltraFabricClient"
+		]
+	},
+	"mixins": [
+		"mtr-ultra.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.15.0",
+		"minecraft": "1.20.1",
+		"java": ">=17",
+		"mtr": "3.1.12"
+	}
+}

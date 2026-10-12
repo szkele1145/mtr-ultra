@@ -1,0 +1,72 @@
+plugins {
+	// loom 版本与 Gradle 8.11 的兼容矩阵：1.6.12 有 Problems API 崩溃、
+	// 1.10.5 要求 Gradle 8.12+；1.9.2 是支持 Gradle 8.11 的稳定版
+	id 'fabric-loom' version '1.9.2'
+}
+
+version = project.mod_version
+group = project.maven_group
+
+base {
+	archivesName = project.archives_base_name
+}
+
+repositories {
+	// 腾讯镜像前置，境内加速；fabric maven 保底（loom 插件依赖与 fabric-api 均在 fabric maven）
+	maven {
+		name = "Tencent"
+		url = "https://mirrors.cloud.tencent.com/nexus/repository/maven-public/"
+	}
+	maven {
+		name = "Fabric"
+		url = "https://maven.fabricmc.net/"
+	}
+	mavenCentral()
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:1.20.1"
+	mappings loom.layered() {
+		officialMojangMappings()
+	}
+	// YMTR 本地 jar：loom 会自动 remap 到 named（Mojang 映射）编译环境
+	modImplementation files("libs/ymtr-fabric-1.20.1.jar")
+	modImplementation "net.fabricmc:fabric-loader:0.15.11"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:0.92.2+1.20.1"
+}
+
+// refmap 名与 mtr-ultra.mixins.json 里声明的 "mtr-ultra.refmap.json" 对齐
+loom {
+	mixin {
+		defaultRefmapName = "mtr-ultra.refmap.json"
+	}
+}
+
+processResources {
+	inputs.property "version", project.version
+	filesMatching("fabric.mod.json") {
+		expand "version": project.version
+	}
+}
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
+}
+
+// 源码布局在 fabric/src/main/java（沿用多目录习惯），追加到 loom 默认 sourceSet
+sourceSets {
+	main {
+		java {
+			srcDir 'fabric/src/main/java'
+		}
+		resources {
+			srcDir 'fabric/src/main/resources'
+		}
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	options.encoding = "UTF-8"
+	options.release = 17
+}
