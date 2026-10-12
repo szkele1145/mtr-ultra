@@ -21,6 +21,11 @@ repositories {
 		name = "Fabric"
 		url = "https://maven.fabricmc.net/"
 	}
+	// architectury-api 所在仓库
+	maven {
+		name = "Architectury"
+		url = "https://maven.architectury.dev/"
+	}
 	mavenCentral()
 }
 
@@ -33,6 +38,13 @@ dependencies {
 	modImplementation files("libs/ymtr-fabric-1.20.1.jar")
 	modImplementation "net.fabricmc:fabric-loader:0.15.11"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:0.92.2+1.20.1"
+
+	// 运行时环境：YMTR 作为 mod 装入 mods 目录（modImplementation 同时已含编译依赖；
+	// 运行时需要发布态 jar —— 用 include 之外的 modRuntimeOnly 指向同 jar）
+	modRuntimeOnly files("libs/ymtr-fabric-1.20.1.jar")
+	// YMTR 运行时依赖 architectury-api（其 fabric.mod.json 只声明 fabric/*，实际主类引用
+	// dev.architectury 事件——冒烟测试实测 NoClassDefFoundError，补上运行时依赖）
+	modRuntimeOnly "dev.architectury:architectury-fabric:9.2.14"
 }
 
 // refmap 名与 mtr-ultra.mixins.json 里声明的 "mtr-ultra.refmap.json" 对齐

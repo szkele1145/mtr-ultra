@@ -1,6 +1,7 @@
 package mtrultra.mixin;
 
 import mtrultra.MtrUltraConfig;
+import mtrultra.util.ScheduleRebuildFlag;
 import mtr.path.PathData;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;

@@ -1,12 +1,16 @@
-package mtrultra.mixin;
+package mtrultra.util;
 
 /**
  * [U5 配套] 排班重建节拍广播（RailwayData → TrainServer）。
  * <p>
  * RailwayDataMixin 在 simulateTrains HEAD 写入本 tick 是否重建排班；
- * TrainServerMixin 在排班重建段读取并按需跳过。
+ * TrainServerMixin 在排班写入处读取并按需跳过。
  * 服务端 tick 线程串行执行 simulateTrains → 全部 simulateTrain，
  * ThreadLocal 广播无并发问题。
+ * <p>
+ * 注意：此类必须位于 mtrultra.util 而非 mtrultra.mixin 包——
+ * mixin 包内的非 mixin 类被 mixin 系统禁止直接引用
+ * （IllegalClassLoadError: cannot be referenced directly）。
  */
 public final class ScheduleRebuildFlag {
 

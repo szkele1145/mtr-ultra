@@ -1,6 +1,7 @@
 package mtrultra.mixin;
 
 import mtrultra.MtrUltraConfig;
+import mtrultra.util.ScheduleRebuildFlag;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
