@@ -1,6 +1,7 @@
 package mtrultra.mixin;
 
 import mtrultra.MtrUltraConfig;
+import mtrultra.MtrUltraStats;
 import mtrultra.util.ScheduleRebuildFlag;
 import mtr.path.PathData;
 import net.minecraft.world.entity.player.Player;
@@ -91,6 +92,7 @@ public abstract class TrainServerMixin {
 				: 4;
 
 		if (mtrultra$simInterval > 1 && ++mtrultra$simCounter < mtrultra$simInterval) {
+			MtrUltraStats.simTicksSkipped.incrementAndGet();
 			cir.setReturnValue(false); // 本 tick 跳过（无需 trainsToSync）
 		} else {
 			mtrultra$simCounter = 0;
@@ -116,6 +118,7 @@ public abstract class TrainServerMixin {
 	)
 	private boolean mtrultra$skipScheduleWrite(Object list, Object entry) {
 		if (MtrUltraConfig.enableScheduleThrottle && !ScheduleRebuildFlag.isSet()) {
+			MtrUltraStats.scheduleWritesSkipped.incrementAndGet();
 			return true; // 非重建 tick：跳过写入（保留上一份数据）
 		}
 		@SuppressWarnings("unchecked")
