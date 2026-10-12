@@ -1,0 +1,71 @@
+plugins {
+	// architectury loom：fabric-loom 的 forge 支持分支，1.9.424 兼容 Gradle 8.11
+	// （备选 1.10.431：mtr-ante 实际使用的版本）
+	id "dev.architectury.loom" version "1.9.424"
+}
+
+version = project.mod_version
+group = project.maven_group
+
+base {
+	archivesName = project.archives_base_name
+}
+
+// 仓库声明保持在 loom 插件应用之后（原始布局）：
+// loom 配置期只用其内部仓库，项目仓库在插件应用完毕后一次性声明，
+// 避免 Gradle 8.10+ 的"使用后突变"检查（提前声明反而会触发该问题）
+repositories {
+	mavenLocal()
+	maven { url = 'https://mirrors.cloud.tencent.com/nexus/repository/maven-public/' }
+	maven { url = "https://maven.aliyun.com/repository/public/" }
+	maven { url = "https://bmclapi2.bangbang93.com/maven/" }
+	maven { url = "https://maven.fabricmc.net/" }
+	maven { url = "https://maven.architectury.dev/" }
+	maven { url "https://maven.minecraftforge.net/" }
+	mavenCentral()
+}
+
+loom {
+	silentMojangMappingsLicense()
+
+	forge {
+		// Forge 内置 mixin 系统通过 MixinConfigs MANIFEST 属性与 mods.toml 声明加载；
+		// 此处显式声明 mixin 配置文件（参考 mtr-ante forge 配置）
+		mixinConfig "mtr-ultra.mixins.json"
+	}
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:1.20.1"
+	mappings loom.layered() {
+		officialMojangMappings()
+	}
+	forge "net.minecraftforge:forge:1.20.1-47.2.0"
+
+	// YMTR forge 本地 jar：loom 会自动 remap 到 named（Mojang 映射）编译环境
+	modImplementation files("../libs/ymtr-forge-1.20.1.jar")
+	// 运行时环境：YMTR 作为 mod 装入 mods 目录
+	modRuntimeOnly files("../libs/ymtr-forge-1.20.1.jar")
+	// YMTR forge 运行时依赖 architectury（其 mods.toml 声明 mandatory）
+	modRuntimeOnly "dev.architectury:architectury-forge:9.2.14"
+}
+
+// mixin remap=false 且 target 均为自定义类名（mtr/*、java/*），不需要 refmap；
+// mixins.json 不声明 refmap 字段，loom 也不生成（保持无 refmap 状态）
+
+processResources {
+	inputs.property "version", project.version
+	filesMatching("META-INF/mods.toml") {
+		expand "version": project.version
+	}
+}
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
+}
+
+tasks.withType(JavaCompile).configureEach {
+	options.encoding = "UTF-8"
+	options.release = 17
+}
