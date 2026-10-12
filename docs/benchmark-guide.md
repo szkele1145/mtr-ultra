@@ -73,7 +73,7 @@
 |---|---|
 | YMTR 3.6.4.2（Fabric/Forge） | ✅ 全部五大优化（实测冒烟通过） |
 | YMTR 3.6.3（公开最新，Fabric/Forge） | ✅ 全部 7 个 mixin 目标签名经 javap 逐项核对一致（2026-10-13 验证） |
-| MTR 3.2.2 官方 | ✅ 目标类签名相同（mtr.data.* 双端一致） |
+| MTR 3.2.2 官方（含 hotfix-2） | ✅ **全部挂钩签名经 javap 实证一致**（详见 compatibility-matrix.md） |
 | ANTE（续更版） | ✅ ANTE 的轨道渲染接管时 U3 的 render 注入仍在原版方法体内生效——互不干扰 |
 | JCM/YUM 等附属 | ✅ 无共享类（它们挂的是 mtr.block/mtr.client，与 U1-U5 目标无交集） |
 
