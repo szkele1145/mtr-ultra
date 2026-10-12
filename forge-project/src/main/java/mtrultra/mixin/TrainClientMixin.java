@@ -36,13 +36,10 @@ public abstract class TrainClientMixin {
 	@Unique
 	private boolean mtrultra$playerRiding = false;
 
-	@Unique
-	private long mtrultra$snapshotFrame = -1;
-
 	/**
 	 * TrainClient.simulateTrain 入口：刷新列车级剔除快照（每帧一次）。
-	 * RenderTrains 对每列车每帧调用一次 simulateTrain，这里以游戏帧号为
-	 * 缓存键避免同帧重复刷新。
+	 * RenderTrains 对每列车每帧调用一次 simulateTrain——
+	 * simulateCar 的剔除判定直接读这里的两个字段。
 	 */
 	@Inject(method = "simulateTrain", at = @At("HEAD"))
 	private void mtrultra$refreshSnapshot(Object world, float ticksElapsed, Object speedCallback, Object announcementCallback, Object lightRailAnnouncementCallback, CallbackInfo ci) {
@@ -50,7 +47,6 @@ public abstract class TrainClientMixin {
 		final Player player = client.player;
 		mtrultra$cameraPos = client.gameRenderer.getMainCamera().getPosition();
 		mtrultra$playerRiding = player != null && isPlayerRiding(player);
-		mtrultra$snapshotFrame = client.level != null ? client.level.getGameTime() : 0;
 	}
 
 	/**
