@@ -20,7 +20,13 @@
 		],
 		"client": [
 			"mtrultra.fabric.MtrUltraFabricClient"
+		],
+		"modmenu": [
+			"mtrultra.fabric.MtrUltraModMenuApi"
 		]
+	},
+	"suggests": {
+		"modmenu": "*"
 	},
 	"mixins": [
 		"mtr-ultra.mixins.json"

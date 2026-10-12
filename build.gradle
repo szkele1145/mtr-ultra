@@ -26,6 +26,11 @@ repositories {
 		name = "Architectury"
 		url = "https://maven.architectury.dev/"
 	}
+	// ModMenu 所在仓库
+	maven {
+		name = "TerraformersMC"
+		url = "https://maven.terraformersmc.com/releases/"
+	}
 	mavenCentral()
 }
 
@@ -38,6 +43,8 @@ dependencies {
 	modImplementation files("libs/ymtr-fabric-1.20.1.jar")
 	modImplementation "net.fabricmc:fabric-loader:0.15.11"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:0.92.2+1.20.1"
+	// ModMenu：配置屏入口点（编译期需要，运行时软依赖）
+	modCompileOnly "com.terraformersmc:modmenu:7.2.2"
 
 	// 运行时环境：YMTR 作为 mod 装入 mods 目录（modImplementation 同时已含编译依赖；
 	// 运行时需要发布态 jar —— 用 include 之外的 modRuntimeOnly 指向同 jar）
