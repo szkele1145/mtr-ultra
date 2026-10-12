@@ -50,6 +50,7 @@ public abstract class RailwayDataMixin {
 		boolean rebuild;
 		if (!MtrUltraConfig.enableScheduleThrottle) {
 			rebuild = true;
+			mtrultra$scheduleTickCounter = 0; // [0.2.3] 关闭期间重置，重开后从第 1 tick 即重建
 		} else {
 			mtrultra$scheduleTickCounter++;
 			final int period = Math.max(1, MtrUltraConfig.scheduleRebuildTicks);

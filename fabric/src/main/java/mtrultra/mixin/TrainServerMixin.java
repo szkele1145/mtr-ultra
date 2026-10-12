@@ -70,8 +70,11 @@ public abstract class TrainServerMixin {
 			@Coerce Map<Long, List<Object>> schedulesForPlatform,
 			@Coerce Map<Long, Map<Object, Object>> trainDelays,
 			CallbackInfoReturnable<Boolean> cir) {
+		// [0.2.3] 所有提前返回路径必须同步重置 ThreadLocal，否则残留上一列车的
+		// interval——开关关闭/手动载客列车会被按上一次的 4 倍步长模拟（真 bug）
 		if (!MtrUltraConfig.enableSimulationLod) {
 			mtrultra$simInterval = 1;
+			TrainServerTickScaleMixin.ULTRA_INTERVAL.set(1);
 			return; // 开关关闭：原版行为
 		}
 
@@ -79,6 +82,7 @@ public abstract class TrainServerMixin {
 		if (mtrultra$isManualOrRiding(world)) {
 			mtrultra$simInterval = 1;
 			mtrultra$simCounter = 0;
+			TrainServerTickScaleMixin.ULTRA_INTERVAL.set(1);
 			return;
 		}
 

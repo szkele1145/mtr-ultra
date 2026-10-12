@@ -75,6 +75,7 @@ public abstract class TrainServerMixin {
 			CallbackInfoReturnable<Boolean> cir) {
 		if (!MtrUltraConfig.enableSimulationLod) {
 			mtrultra$simInterval = 1;
+			TrainServerTickScaleMixin.ULTRA_INTERVAL.set(1);
 			return; // 开关关闭：原版行为
 		}
 
@@ -82,6 +83,7 @@ public abstract class TrainServerMixin {
 		if (mtrultra$isManualOrRiding(world)) {
 			mtrultra$simInterval = 1;
 			mtrultra$simCounter = 0;
+			TrainServerTickScaleMixin.ULTRA_INTERVAL.set(1);
 			return;
 		}
 
