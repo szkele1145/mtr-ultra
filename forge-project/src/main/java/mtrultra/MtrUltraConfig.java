@@ -50,6 +50,9 @@ public class MtrUltraConfig {
                 simulationLodMidBlocks = get(obj, "simulationLodMidBlocks", simulationLodMidBlocks);
                 enableScheduleThrottle = get(obj, "enableScheduleThrottle", enableScheduleThrottle);
                 scheduleRebuildTicks = get(obj, "scheduleRebuildTicks", scheduleRebuildTicks);
+                // [0.2.2] 一致性钳制: near < mid; period >= 1
+                simulationLodNearBlocks = Math.min(simulationLodNearBlocks, simulationLodMidBlocks - 1);
+                scheduleRebuildTicks = Math.max(1, scheduleRebuildTicks);
             }
             save(); // 回写补全新字段
         } catch (Exception e) {

@@ -76,7 +76,9 @@ public class MtrUltraModMenuApi implements ModMenuApi {
 
 				@Override
 				protected void applyValue() {
-					MtrUltraConfig.simulationLodNearBlocks = 32 + (int) (this.value * 992);
+					// near 必须严格小于 mid（LOD 分级三目逻辑的前提），
+					// 越界时钳制到 mid-1，避免 near>=mid 时降频分级永假
+					MtrUltraConfig.simulationLodNearBlocks = Math.min(32 + (int) (this.value * 992), MtrUltraConfig.simulationLodMidBlocks - 1);
 					this.updateMessage();
 					MtrUltraConfig.save();
 				}
@@ -91,7 +93,8 @@ public class MtrUltraModMenuApi implements ModMenuApi {
 
 				@Override
 				protected void applyValue() {
-					MtrUltraConfig.simulationLodMidBlocks = 64 + (int) (this.value * 1984);
+					// mid 必须大于 near，否则钳制
+					MtrUltraConfig.simulationLodMidBlocks = Math.max(64 + (int) (this.value * 1984), MtrUltraConfig.simulationLodNearBlocks + 1);
 					this.updateMessage();
 					MtrUltraConfig.save();
 				}

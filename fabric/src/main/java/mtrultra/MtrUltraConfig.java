@@ -48,6 +48,11 @@ public class MtrUltraConfig {
                 simulationLodMidBlocks = get(obj, "simulationLodMidBlocks", simulationLodMidBlocks);
                 enableScheduleThrottle = get(obj, "enableScheduleThrottle", enableScheduleThrottle);
                 scheduleRebuildTicks = get(obj, "scheduleRebuildTicks", scheduleRebuildTicks);
+                // [0.2.2] 加载期一致性钳制：LOD 分级三目逻辑要求 near < mid；
+                // 手编 JSON 可能写出 near>=mid（此时分级永假=全部按 mid 档处理），
+                // scheduleRebuildTicks 至少为 1（0 会取模崩溃）
+                simulationLodNearBlocks = Math.min(simulationLodNearBlocks, simulationLodMidBlocks - 1);
+                scheduleRebuildTicks = Math.max(1, scheduleRebuildTicks);
             }
             save(); // 回写补全新字段
         } catch (Exception e) {
