@@ -29,6 +29,13 @@ def depMatrix = [
 		modMenu : "com.terraformersmc:modmenu:4.2.0-beta.2",
 		targetJar: "libs/ymtr-fabric-1.19.2.jar",
 		runtimeExtra: "dev.architectury:architectury-fabric:6.6.92"
+	],
+	"1.18.2": [
+		fabricApi: "net.fabricmc.fabric-api:fabric-api:0.77.0+1.18.2",
+		modMenu : "com.terraformersmc:modmenu:3.2.5",
+		// 1.18.2 无 YMTR —— 用官方 MTR 3.2.2-hotfix-1（签名已 javap 核对一致）
+		targetJar: "libs/mtr-fabric-1.18.2.jar",
+		runtimeExtra: null
 	]
 ]
 def deps = depMatrix[targetMcVersion]
@@ -118,14 +125,17 @@ java {
 	targetCompatibility = JavaVersion.VERSION_17
 }
 
-// 源码布局在 fabric/src/main/java（沿用多目录习惯），追加到 loom 默认 sourceSet。
-// 1.19.x 构建排除 ModMenu 配置屏（GuiGraphics 依赖）。
+// [multi-version] 1.19.x 构建排除 ModMenu 配置屏（GuiGraphics 依赖）。
+// 1.18.2 额外排除 stats 命令注册（fabric-api 0.77.0+1.18.2 无 command v2 包）。
 sourceSets {
 	main {
 		java {
 			srcDir 'fabric/src/main/java'
 			if (!hasModMenuScreen) {
 				exclude 'mtrultra/fabric/MtrUltraModMenuApi.java'
+			}
+			if (targetMcVersion == "1.18.2") {
+				exclude 'mtrultra/fabric/MtrUltraCommands.java'
 			}
 		}
 		resources {
@@ -135,6 +145,7 @@ sourceSets {
 }
 
 // [multi-version] 1.19.x 的 fabric.mod.json 需移除 modmenu 入口点。
+// 1.18.2 额外提示无 stats 命令（changelog 已注明）。
 // 纯文本正则在多形态缩进/逗号下脆弱（实测 MalformedJson: 尾逗号残留），
 // 改用 JsonSlurper/JsonBuilder 结构化处理——只重写这个小文件，安全可靠。
 processResources {

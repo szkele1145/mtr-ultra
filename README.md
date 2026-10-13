@@ -1,13 +1,15 @@
 # MTR Turbo — Minecraft Transit Railway 大存档性能优化附属
 
-> 独立 mixin 附属 mod（**不是** MTR/YMTR 的分支），挂钩 MTR 3.2.2 / YMTR 3.x（MC 1.20.1，Fabric+Forge）。
+> 独立 mixin 附属 mod（**不是** MTR/YMTR 的分支），挂钩 MTR 3.2.2 / YMTR 3.x（Fabric+Forge）。
 > 目标：让百车多线的大型存档流畅运行。定位激进优化——允许改变渲染/模拟细节行为。
 
 ## 状态
 
-**v0.2.5** — 11 轮真实服务器冒烟 + 三方共存实测（YMTR+ANTE+MTR Turbo）。
+**v1.0.4** — 21 轮真实服务器冒烟 + 三方共存实测（YMTR+ANTE+MTR Turbo）。
 五大优化全部带独立开关、stats 仪表（`/mtrturbo stats`）、双端配置屏
 （Fabric: ModMenu / Forge: `/mtrturbo screen`）。
+**多版本矩阵**：MC 1.19.2 / 1.19.4 / 1.20.1 × Fabric，1.20.1 另有 Forge
+（mixin 目标签名跨三版本 javap 实证一致）。
 **与 ANTE 共存**：检测到 ANTE 时 U5 自动让位（IMixinConfigPlugin），
 U1-U4 全活跃，启动日志明示。兼容面字节码实证：MTR 官方 3.2.2-hotfix-2
 与 YMTR 3.6.3/3.6.4.2 的全部挂钩签名一致（见 `docs/compatibility-matrix.md`）。
