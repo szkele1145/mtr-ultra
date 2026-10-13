@@ -24,8 +24,9 @@ import java.util.Set;
  */
 public class MtrUltraMixinPlugin implements IMixinConfigPlugin {
 
-	private static final String ANTE_MODID = "mtrsteamloco";
 	private static final String CONFLICTING_MIXIN = "mtrultra.mixin.RailwayDataMixin";
+	private static final String ANTE_ENTRY_CLASS = "cn.zbx1425.mtrsteamloco.Main";
+	private static final String ANTE_MODID = "mtrsteamloco";
 
 	@Override
 	public void onLoad(String mixinPackage) {
@@ -38,14 +39,32 @@ public class MtrUltraMixinPlugin implements IMixinConfigPlugin {
 
 	@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-		if (CONFLICTING_MIXIN.equals(mixinClassName)) {
-			final boolean antePresent = FabricLoader.getInstance().isModLoaded(ANTE_MODID);
-			if (antePresent) {
-				System.out.println("[MTR-Ultra] ANTE (mtrsteamloco) detected - U5 schedule throttle mixin (RailwayDataMixin) skipped to avoid simulateTrains overwrite conflict. U1-U4 remain fully active.");
-				return false;
-			}
+		if (CONFLICTING_MIXIN.equals(mixinClassName) && isAnteLoaded()) {
+			System.out.println("[MTR-Ultra] ANTE (mtrsteamloco) detected - U5 schedule throttle mixin (RailwayDataMixin) skipped to avoid simulateTrains overwrite conflict. U1-U4 remain fully active.");
+			return false;
 		}
 		return true;
+	}
+
+	private static boolean isAnteLoaded() {
+		// 主检测：类路径特征（mixin 期 knot classloader 已组装，100% 可用，
+		// 与加载器内部状态无关；主类在则 ANTE 必在场）
+		try {
+			Class.forName(ANTE_ENTRY_CLASS, false, MtrUltraMixinPlugin.class.getClassLoader());
+			return true;
+		} catch (final ClassNotFoundException expected) {
+			// ANTE 不在场，走辅助检测
+		} catch (final Throwable t) {
+			return true; // 类在但初始化异常 — 保守跳过
+		}
+		// 辅助检测：FabricLoader 的 mod 列表（理论上 mixin 期已可用，
+		// 万一加载器实现差异导致异常，兜底 false = 放行——类路径探测
+		// 是权威判据，走到这里说明 ANTE 确实不在）
+		try {
+			return FabricLoader.getInstance().isModLoaded(ANTE_MODID);
+		} catch (final Throwable t) {
+			return false;
+		}
 	}
 
 	@Override
