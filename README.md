@@ -5,13 +5,15 @@
 
 ## 状态
 
-**v1.0.4** — 21 轮真实服务器冒烟 + 三方共存实测（YMTR+ANTE+MTR Turbo）。
-五大优化全部带独立开关、stats 仪表（`/mtrturbo stats`）、双端配置屏
-（Fabric: ModMenu / Forge: `/mtrturbo screen`）。
-**多版本矩阵**：MC 1.19.2 / 1.19.4 / 1.20.1 × Fabric，1.20.1 另有 Forge
-（mixin 目标签名跨三版本 javap 实证一致）。
+**v1.1.1** — 23 轮真实服务器冒烟 + 三方共存实测（YMTR+ANTE+MTR Turbo）。
+**六大优化**（U1 扫描短路 / U2 车厢剔除 / U3 容器复用 / U4 模拟 LOD /
+U5 排班节流 / **U6 曲率缓存**）全部带独立开关与 stats 仪表
+（`/mtrturbo stats` 或周期日志 `statsLogIntervalSeconds`）、双端配置屏
+（Fabric: ModMenu / Forge: `/mtrturbo screen`，1.20.x）。
+**多版本矩阵**：MC 1.18.2 / 1.19.2 / 1.19.4 / 1.20.1 × Fabric，1.20.1 另有 Forge
+（mixin 目标签名跨四版本 javap 实证一致；U6 描述符 1.18.2~1.20.1 逐字相同）。
 **与 ANTE 共存**：检测到 ANTE 时 U5 自动让位（IMixinConfigPlugin），
-U1-U4 全活跃，启动日志明示。兼容面字节码实证：MTR 官方 3.2.2-hotfix-2
+其余全活跃，启动日志明示。兼容面字节码实证：MTR 官方 3.2.2-hotfix-2
 与 YMTR 3.6.3/3.6.4.2 的全部挂钩签名一致（见 `docs/compatibility-matrix.md`）。
 
 ## 架构
@@ -53,15 +55,17 @@ MTR Turbo/
 | U3 | 渲染去重容器复用 | RenderTrains.render（@Redirect NEW HashMap） | 每帧省 HashMap 桶分配 | ✅ 已验证 |
 | U4 | 服务端模拟 LOD | TrainServer.simulateTrain（HEAD 节拍 + @ModifyArg 步长放大） | 远端列车开销 1/2~1/4 | ✅ 已验证 |
 | U5 | 排班重建节流(20tick) | RailwayData.clear + TrainServer 排班写入 | 近处列车排班开销 1/20 | ✅ 已验证（ANTE 在场时自动让位） |
+| **U6** | **Rail 曲率缓存** | Train.getRoutePosition（@Redirect getPosition） | **每 tick 省 ~270 次 87 字节码三角链**（0.25 格插值，视觉不可辨；缓存永真——轨道不可变） | ✅ 已验证（1.18.2~1.20.1） |
 
 ### 行为保证
 
 - 手动驾驶/载有玩家的列车 **永不降频**（U4）；
 - 排班节流的 clear 与重建同频，间隔期保留上一份数据——PIDS/传感器/Web 到站**无空窗**（U5）；
 - 骑乘者所在列车豁免渲染剔除（U2）；
-- **与 ANTE 共存**：检测到 ANTE 自动禁用 U5（IMixinConfigPlugin），U1-U4 全活跃（三方实测）；
-- 每项可单独关闭（`enableDoorScanShortCircuit` / `enableCarRenderCulling` / `enableRailDedupNoAlloc` / `enableSimulationLod` / `enableScheduleThrottle`）；
-- `/mtrturbo stats`（OP）实时查看各优化命中数与节省估算；Fabric 经 ModMenu / Forge 经 `/mtrturbo screen` 可视化调参（1.20.x；1.18.2/1.19.x 请手编 `config/mtr-turbo.json`）。
+- 曲率缓存插值误差 <0.125 格（轨道纹理最小 1 格，视觉不可辨），轨道不可变故缓存永真（U6）；
+- **与 ANTE 共存**：检测到 ANTE 自动禁用 U5（IMixinConfigPlugin），其余全活跃（三方实测）；
+- 每项可单独关闭（`enableDoorScanShortCircuit` / `enableCarRenderCulling` / `enableRailDedupNoAlloc` / `enableSimulationLod` / `enableScheduleThrottle` / `enableRailPositionCache`）；
+- `/mtrturbo stats`（OP）实时查看各优化命中数与节省估算；`statsLogIntervalSeconds` 周期日志（全部版本）；Fabric 经 ModMenu / Forge 经 `/mtrturbo screen` 可视化调参（1.20.x；1.18.2/1.19.x 请手编 `config/mtr-turbo.json`）。
 
 ## 构建
 
