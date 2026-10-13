@@ -2,6 +2,7 @@ package mtrultra.forge;
 
 import com.mojang.brigadier.CommandDispatcher;
 import mtrultra.MtrUltraConfig;
+import mtrultra.MtrUltraStats;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
@@ -125,6 +126,24 @@ public final class MtrUltraForgeClientCommands {
 				int p = MtrUltraConfig.scheduleRebuildTicks;
 				MtrUltraConfig.scheduleRebuildTicks = p == 20 ? 40 : p == 40 ? 60 : p == 60 ? 10 : 20;
 				b.setMessage(Component.literal("Schedule period: every " + MtrUltraConfig.scheduleRebuildTicks + " ticks"));
+				MtrUltraConfig.save();
+			}).bounds(x0, y, w, 20).build());
+			y += 24;
+
+			// [1.1.2] U6 曲率缓存开关（对齐 Fabric 屏）
+			addRenderableWidget(Button.builder(toggleLabel("Rail curve cache (U6)", MtrUltraConfig.enableRailPositionCache), b -> {
+				MtrUltraConfig.enableRailPositionCache = !MtrUltraConfig.enableRailPositionCache;
+				b.setMessage(toggleLabel("Rail curve cache (U6)", MtrUltraConfig.enableRailPositionCache));
+				MtrUltraConfig.save();
+			}).bounds(x0, y, w, 20).build());
+			y += 24;
+
+			// [1.1.2] 周期日志间隔循环: 0 → 60 → 300 → 600 → 0（秒），立即生效
+			addRenderableWidget(Button.builder(Component.literal("Stats log: " + (MtrUltraConfig.statsLogIntervalSeconds == 0 ? "OFF" : "every " + MtrUltraConfig.statsLogIntervalSeconds + "s")), b -> {
+				int s = MtrUltraConfig.statsLogIntervalSeconds;
+				MtrUltraConfig.statsLogIntervalSeconds = s == 0 ? 60 : s == 60 ? 300 : s == 300 ? 600 : 0;
+				MtrUltraStats.initPeriodicLog();
+				b.setMessage(Component.literal("Stats log: " + (MtrUltraConfig.statsLogIntervalSeconds == 0 ? "OFF" : "every " + MtrUltraConfig.statsLogIntervalSeconds + "s")));
 				MtrUltraConfig.save();
 			}).bounds(x0, y, w, 20).build());
 			y += 28;
