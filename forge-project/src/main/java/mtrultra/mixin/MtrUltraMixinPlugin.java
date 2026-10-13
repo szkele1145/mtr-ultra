@@ -8,30 +8,27 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * [0.2.5] Mixin 配置插件（Forge 版）：检测 ANTE（mtrsteamloco）在场时
- * 跳过 U5 的 RailwayDataMixin —— ANTE 的同名 mixin 整体覆写了
- * simulateTrains，任何后续注入都会被 PREINJECT Applicator 硬拒绝
- * （Fabric 三方实测两次确认；Forge 同理）。
+ * [1.0.2] Mixin 配置插件（Forge 版）：检测 ANTE（mtrsteamloco）在场时
+ * 跳过 U5 的 RailwayDataMixin。
  * <p>
- * U5 让位后：ScheduleRebuildFlag 保持默认 TRUE = 每 tick 重建（原版行为）；
- * U1-U4 全部照常。
+ * ⚠️ Forge 三方实测（2026-10-13）推翻了 Fabric 的检测方案移植：
+ * Forge 的 mod 类由 ModClassLoader 在稍后阶段装载，
+ * mixin 配置期 Class.forName 探测不到 ANTE 主类 → 探测失败 →
+ * U5 没被跳过 → 与 ANTE 的 simulateTrains 覆写冲突 → 启动崩溃。
  * <p>
- * 检测方式（主→辅）：
- * 1. <b>类路径特征探测</b>（主）：尝试 Class.forName 加载 ANTE 的入口类。
- *    mixin 配置期 knot/mod classloader 已组装完毕，探测 100% 可用，
- *    不依赖任何 Forge 内部状态的初始化时机；
- * 2. ModList.get().isLoaded（辅）：Forge 原生 mod 列表，但它在 mixin
- *    配置期可能尚未初始化（返回 null 或抛异常）——只作加分项，
- *    检测不到不影响 1 的结论。
+ * Forge 正解：mixin 配置期唯一可靠的"ANTE 在场"信号是
+ * <b>游戏目录 mods 文件夹里的 jar 文件名特征</b>——纯文件系统探测，
+ * 不依赖任何类加载状态。扫描 mods 目录找含 "mtr-ante"/"mtrsteamloco"
+ * 特征的 .jar 即可（Forge Dev 环境的 mods 目录 = run/mods）。
  * <p>
- * 保守方向：两级都失败时<b>不跳过</b>（放行 U5）——绝大多数用户不装 ANTE，
- * 放行是正确行为；装了 ANTE 而 1 级探测也失效的场景实际不存在
- * （ANTE 的 jar 在 classpath 上，其入口类必然可探测）。
+ * 检测顺序（主→辅）：
+ * 1. mods 目录文件名扫描（主，Forge 下 100% 可用）；
+ * 2. ModList（辅助，可能未初始化）；
+ * 3. 都失败 → 不跳过（无 ANTE 用户正确）。
  */
 public class MtrUltraMixinPlugin implements IMixinConfigPlugin {
 
 	private static final String CONFLICTING_MIXIN = "mtrultra.mixin.RailwayDataMixin";
-	private static final String ANTE_ENTRY_CLASS = "cn.zbx1425.mtrsteamloco.Main";
 	private static final String ANTE_MODID = "mtrsteamloco";
 
 	@Override
@@ -46,24 +43,30 @@ public class MtrUltraMixinPlugin implements IMixinConfigPlugin {
 	@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
 		if (CONFLICTING_MIXIN.equals(mixinClassName) && isAnteLoaded()) {
-			System.out.println("[MTR-Ultra] ANTE (mtrsteamloco) detected - U5 schedule throttle mixin (RailwayDataMixin) skipped to avoid simulateTrains overwrite conflict. U1-U4 remain fully active.");
+			System.out.println("[MTR-Turbo] ANTE (mtrsteamloco) detected - U5 schedule throttle mixin (RailwayDataMixin) skipped to avoid simulateTrains overwrite conflict. U1-U4 remain fully active.");
 			return false;
 		}
 		return true;
 	}
 
 	private static boolean isAnteLoaded() {
-		// 主检测：类路径特征（mixin 期 100% 可用，不依赖 Forge 内部状态）
+		// 主检测：mods 目录文件名扫描（mixin 配置期文件系统已就绪，Forge 下 100% 可用）
 		try {
-			Class.forName(ANTE_ENTRY_CLASS, false, MtrUltraMixinPlugin.class.getClassLoader());
-			return true;
-		} catch (final ClassNotFoundException expected) {
-			// ANTE 不在场，走辅助检测
-		} catch (final Throwable t) {
-			// 类存在但初始化异常 — 视为在场（保守跳过 U5）
-			return true;
+			final java.nio.file.Path modsDir = java.nio.file.Paths.get("mods").toAbsolutePath().normalize();
+			if (java.nio.file.Files.isDirectory(modsDir)) {
+				try (final java.util.stream.Stream<java.nio.file.Path> files = java.nio.file.Files.list(modsDir)) {
+					for (final java.nio.file.Path p : (Iterable<java.nio.file.Path>) files::iterator) {
+						final String name = p.getFileName().toString().toLowerCase(java.util.Locale.ROOT);
+						if (name.endsWith(".jar") && (name.contains("mtr-ante") || name.contains("mtrsteamloco") || name.contains("mtr_ante"))) {
+							return true;
+						}
+					}
+				}
+			}
+		} catch (final Throwable ignored) {
+			// 文件系统不可用 — 走辅助检测
 		}
-		// 辅助检测：Forge ModList（可能未初始化，失败不影响结论）
+		// 辅助检测：Forge ModList（可能未初始化）
 		try {
 			return net.minecraftforge.fml.ModList.get().isLoaded(ANTE_MODID);
 		} catch (final Throwable t) {
