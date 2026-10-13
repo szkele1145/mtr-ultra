@@ -4,6 +4,7 @@
 	"package": "mtrultra.mixin",
 	"compatibilityLevel": "JAVA_17",
 	"refmap": "mtr-ultra.refmap.json",
+	"plugin": "mtrultra.mixin.MtrUltraMixinPlugin",
 	"mixins": [
 		"TrainServerMixin",
 		"TrainServerTickScaleMixin",

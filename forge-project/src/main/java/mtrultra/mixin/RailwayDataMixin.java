@@ -30,6 +30,11 @@ import java.util.Map;
  * <p>
  * Forge 版差异：无（target 全不含 MC 类，javap 已验证 simulateTrains 与
  * schedulesForPlatform 字段存在）。
+ * <p>
+ * <b>与 ANTE 共存（require=0 优雅降级）</b>：ANTE 的 RailwayDataMixin 整体
+ * 覆写 simulateTrains，本类对该方法的注入会被拒。全部注入点 require = 0：
+ * 失败仅警告不崩溃——U1-U4 照常，U5 在 ANTE 环境自动让位
+ * （ScheduleRebuildFlag 默认 TRUE = 每 tick 重建，原版行为）。
  */
 @Mixin(targets = "mtr.data.RailwayData", remap = false)
 public abstract class RailwayDataMixin {
@@ -40,7 +45,7 @@ public abstract class RailwayDataMixin {
 	@Unique
 	private long mtrultra$scheduleTickCounter = 0;
 
-	@Inject(method = "simulateTrains", at = @At("HEAD"))
+	@Inject(method = "simulateTrains", at = @At("HEAD"), require = 0)
 	private void mtrultra$scheduleThrottle(CallbackInfo ci) {
 		boolean rebuild;
 		if (!MtrUltraConfig.enableScheduleThrottle) {
@@ -61,7 +66,8 @@ public abstract class RailwayDataMixin {
 	 */
 	@Redirect(
 			method = "simulateTrains",
-			at = @At(value = "INVOKE", target = "Ljava/util/Map;clear()V")
+			at = @At(value = "INVOKE", target = "Ljava/util/Map;clear()V"),
+			require = 0
 	)
 	private void mtrultra$throttledClear(Map<Object, Object> map) {
 		if (MtrUltraConfig.enableScheduleThrottle

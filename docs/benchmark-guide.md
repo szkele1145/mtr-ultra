@@ -74,7 +74,7 @@
 | YMTR 3.6.4.2（Fabric/Forge） | ✅ 全部五大优化（实测冒烟通过） |
 | YMTR 3.6.3（公开最新，Fabric/Forge） | ✅ 全部 7 个 mixin 目标签名经 javap 逐项核对一致（2026-10-13 验证） |
 | MTR 3.2.2 官方（含 hotfix-2） | ✅ **全部挂钩签名经 javap 实证一致**（详见 compatibility-matrix.md） |
-| ANTE（续更版） | ✅ ANTE 的轨道渲染接管时 U3 的 render 注入仍在原版方法体内生效——互不干扰 |
+| ANTE（续更版） | ✅ **三方实测通过**（YMTR+ANTE+MTR-Ultra 同装）：0.2.5 起 IMixinConfigPlugin 检测 ANTE 并自动跳过 U5（ANTE 整体覆写 simulateTrains，硬冲突）；U1-U4 全部照常，启动日志有明确提示 |
 | JCM/YUM 等附属 | ✅ 无共享类（它们挂的是 mtr.block/mtr.client，与 U1-U5 目标无交集） |
 
 > 若未来 YMTR 更新改变目标方法签名：相关 mixin 会在启动期大声失败

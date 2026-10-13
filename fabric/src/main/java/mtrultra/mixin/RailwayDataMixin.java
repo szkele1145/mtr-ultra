@@ -25,16 +25,16 @@ import java.util.Map;
  *   广播给 TrainServer 端的伴生 mixin）；
  * - @Redirect 精确替换 schedulesForPlatform.clear()：非重建 tick 不清空。
  * <p>
- * 安全边界：signalBlocks.resetOccupied()（每 tick 防撞）不受影响——
- * @Redirect 的 target 是 Map.clear 签名且 slice 限定在 clear 与
- * resetOccupied 之间。若同方法存在多个 Map.clear 调用，Redirect 要求
- * 唯一匹配会直接失败（mixin 配置 required=true 构建期报错）——
- * 保险起见用 ordinal 需先验证；此处先用宽匹配+运行时字段判定：
- * Redirect handler 内检查被清对象是否为 schedulesForPlatform。
+ * <b>与 ANTE 共存（require=0 优雅降级）</b>：ANTE 的 RailwayDataMixin
+ * 整体覆写了 simulateTrains（含自己的轨道遍历优化），三方实测中本 mixin
+ * 对该方法的注入会被拒（"merged by"冲突）。因此本类全部注入点
+ * require = 0：应用失败仅记录警告、不崩溃——U1-U4 照常工作，
+ * U5 的排班节流在 ANTE 环境自动让位（ScheduleRebuildFlag 保持默认
+ * TRUE = 每 tick 重建，与原版行为一致）。
  * <p>
- * 注意：TrainServer 端的排班重建段节流在 TrainServerMixin 中按
- * ScheduleRebuildFlag 实现（同 tick 全列车一致跳过，避免部分重建
- * 混入上一份数据造成重复排班）。
+ * 安全边界：signalBlocks.resetOccupied()（每 tick 防撞）不受影响——
+ * @Redirect 的 target 是 Map.clear 签名，handler 内检查被清对象是否为
+ * schedulesForPlatform。
  */
 @Mixin(targets = "mtr.data.RailwayData", remap = false)
 public abstract class RailwayDataMixin {
@@ -45,7 +45,7 @@ public abstract class RailwayDataMixin {
 	@Unique
 	private long mtrultra$scheduleTickCounter = 0;
 
-	@Inject(method = "simulateTrains", at = @At("HEAD"))
+	@Inject(method = "simulateTrains", at = @At("HEAD"), require = 0)
 	private void mtrultra$scheduleThrottle(CallbackInfo ci) {
 		boolean rebuild;
 		if (!MtrUltraConfig.enableScheduleThrottle) {
@@ -66,7 +66,8 @@ public abstract class RailwayDataMixin {
 	 */
 	@Redirect(
 			method = "simulateTrains",
-			at = @At(value = "INVOKE", target = "Ljava/util/Map;clear()V")
+			at = @At(value = "INVOKE", target = "Ljava/util/Map;clear()V"),
+			require = 0
 	)
 	private void mtrultra$throttledClear(Map<Object, Object> map) {
 		if (MtrUltraConfig.enableScheduleThrottle
