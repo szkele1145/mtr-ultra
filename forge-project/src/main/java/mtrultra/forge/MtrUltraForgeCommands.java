@@ -28,6 +28,15 @@ public final class MtrUltraForgeCommands {
 						.executes(context -> {
 							context.getSource().sendSystemMessage(net.minecraft.network.chat.Component.literal(MtrUltraStats.report()));
 							return 1;
+						}))
+				// [1.1.3] /mtrturbo dump — stats 快照写 config/mtrturbo-stats.json
+				.then(Commands.literal("dump").requires(source -> source.hasPermission(2))
+						.executes(context -> {
+							final int count = MtrUltraStats.dumpJson();
+							context.getSource().sendSystemMessage(net.minecraft.network.chat.Component.literal(
+									count > 0 ? "MTR-Turbo: stats snapshot written to config/mtrturbo-stats.json (" + count + " counters)"
+											: "MTR-Turbo: stats dump failed - check the log"));
+							return count > 0 ? 1 : 0;
 						})));
 	}
 }

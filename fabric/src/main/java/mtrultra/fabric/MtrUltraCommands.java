@@ -29,6 +29,16 @@ public final class MtrUltraCommands {
 							.executes(context -> {
 								context.getSource().sendSystemMessage(net.minecraft.network.chat.Component.literal(MtrUltraStats.report()));
 								return 1;
+							}))
+					// [1.1.3] /mtrturbo dump — 把 stats 快照写入 config/mtrturbo-stats.json
+					// 便于社区分享标准化基准数据（含平台/版本元信息）
+					.then(Commands.literal("dump").requires(source -> source.hasPermission(2))
+							.executes(context -> {
+								final int count = MtrUltraStats.dumpJson();
+								context.getSource().sendSystemMessage(net.minecraft.network.chat.Component.literal(
+										count > 0 ? "MTR-Turbo: stats snapshot written to config/mtrturbo-stats.json (" + count + " counters)"
+												: "MTR-Turbo: stats dump failed - check the log"));
+								return count > 0 ? 1 : 0;
 							})));
 		});
 	}

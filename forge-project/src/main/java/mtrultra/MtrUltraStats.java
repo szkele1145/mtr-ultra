@@ -88,4 +88,30 @@ public final class MtrUltraStats {
 		return String.format("MTR-Turbo stats: scanDoorsShorted=%d (~%d block reads saved) | carsCulled=%d | simTicksSkipped=%d | scheduleWritesSkipped=%d | railPositionCached=%d (~%d trig chains saved)%s",
 				d, d * 600, c, s, w, rp, rp, rates);
 	}
+
+	/**
+	 * [1.1.3] 把当前计数器快照写成 config/mtrturbo-stats.json（/mtrturbo dump）。
+	 * Forge 版：FMLPaths.CONFIGDIR + loader 标记 forge。
+	 */
+	public static int dumpJson() {
+		try {
+			final com.google.gson.JsonObject root = new com.google.gson.JsonObject();
+			root.addProperty("timestamp", System.currentTimeMillis());
+			root.addProperty("mod", "mtr-turbo");
+			root.addProperty("loader", "forge");
+			final com.google.gson.JsonObject counters = new com.google.gson.JsonObject();
+			counters.addProperty("doorScanSkipped", doorScanSkipped.get());
+			counters.addProperty("carsCulled", carsCulled.get());
+			counters.addProperty("simTicksSkipped", simTicksSkipped.get());
+			counters.addProperty("scheduleWritesSkipped", scheduleWritesSkipped.get());
+			counters.addProperty("railPositionCached", railPositionCached.get());
+			root.add("counters", counters);
+			final java.nio.file.Path out = net.minecraftforge.fml.loading.FMLPaths.CONFIGDIR.get().resolve("mtrturbo-stats.json");
+			java.nio.file.Files.writeString(out, new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(root));
+			return 5;
+		} catch (final Exception e) {
+			MtrUltraMod.LOGGER.error("Failed to write stats dump", e);
+			return 0;
+		}
+	}
 }

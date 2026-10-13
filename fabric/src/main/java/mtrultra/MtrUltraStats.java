@@ -88,4 +88,43 @@ public final class MtrUltraStats {
 		return String.format("MTR-Turbo stats: scanDoorsShorted=%d (~%d block reads saved) | carsCulled=%d | simTicksSkipped=%d | scheduleWritesSkipped=%d | railPositionCached=%d (~%d trig chains saved)%s",
 				d, d * 600, c, s, w, rp, rp, rates);
 	}
+
+	/**
+	 * [1.1.3] 把当前计数器快照写成 config/mtrturbo-stats.json（/mtrturbo dump）。
+	 * <p>
+	 * 结构含时间戳、加载器、MC 版本与六个计数器——社区分享基准数据时格式统一，
+	 * 便于跨存档对比。返回写入的计数器数量（0=失败）。
+	 */
+	public static int dumpJson() {
+		try {
+			final com.google.gson.JsonObject root = new com.google.gson.JsonObject();
+			root.addProperty("timestamp", System.currentTimeMillis());
+			root.addProperty("mod", "mtr-turbo");
+			root.addProperty("loader", "fabric");
+			root.addProperty("minecraft", guessMcVersion());
+			final com.google.gson.JsonObject counters = new com.google.gson.JsonObject();
+			counters.addProperty("doorScanSkipped", doorScanSkipped.get());
+			counters.addProperty("carsCulled", carsCulled.get());
+			counters.addProperty("simTicksSkipped", simTicksSkipped.get());
+			counters.addProperty("scheduleWritesSkipped", scheduleWritesSkipped.get());
+			counters.addProperty("railPositionCached", railPositionCached.get());
+			root.add("counters", counters);
+			final java.nio.file.Path out = net.fabricmc.loader.api.FabricLoader.getInstance().getConfigDir().resolve("mtrturbo-stats.json");
+			java.nio.file.Files.writeString(out, new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(root));
+			return 5;
+		} catch (final Exception e) {
+			MtrUltraMod.LOGGER.error("Failed to write stats dump", e);
+			return 0;
+		}
+	}
+
+	/** MC 版本探测（dump 用；fabric-loader 的 minecraft 容器版本，稳定跨版本） */
+	private static String guessMcVersion() {
+		try {
+			return net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer("minecraft")
+					.map(c -> c.getMetadata().getVersion().getFriendlyString()).orElse("unknown");
+		} catch (final Throwable t) {
+			return "unknown";
+		}
+	}
 }
