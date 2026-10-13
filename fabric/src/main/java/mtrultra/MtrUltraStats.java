@@ -52,7 +52,7 @@ public final class MtrUltraStats {
 		lastSimTicks = s;
 		lastScheduleWrites = w;
 
-		return String.format("MTR-Ultra stats: scanDoorsShorted=%d (~%d block reads saved) | carsCulled=%d | simTicksSkipped=%d | scheduleWritesSkipped=%d%s",
+		return String.format("MTR-Turbo stats: scanDoorsShorted=%d (~%d block reads saved) | carsCulled=%d | simTicksSkipped=%d | scheduleWritesSkipped=%d%s",
 				d, d * 600, c, s, w, rates);
 	}
 }

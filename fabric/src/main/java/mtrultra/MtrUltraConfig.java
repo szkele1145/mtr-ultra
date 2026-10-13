@@ -9,7 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * MTR-Ultra 配置：每项优化独立开关（默认全开），JSON 持久化。
+ * MTR Turbo 配置：每项优化独立开关（默认全开），JSON 持久化。
  * 出问题时可逐项关闭定位，或整体回退原版行为。
  */
 public class MtrUltraConfig {
