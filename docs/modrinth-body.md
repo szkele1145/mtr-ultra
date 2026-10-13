@@ -1,15 +1,15 @@
 # MTR Turbo
 
-Aggressive performance optimizations for large **Minecraft Transit Railway** worlds — simulation LOD, car-level render culling, schedule throttling. Works on top of MTR 3.2.x / YMTR (Yomi's MTR) on MC 1.20.1 Fabric.
+Aggressive performance optimizations for large **Minecraft Transit Railway** worlds. Standalone mixin addon (NOT a fork of MTR/YMTR) working on top of MTR 3.2.x / YMTR (Yomi's MTR).
 
-> MTR 大存档激进性能优化附属：服务端模拟 LOD、车厢级渲染剔除、排班节流。
-> 独立 mixin 附属（非 MTR/YMTR 分支），每项优化可独立开关。
+> MTR 大存档激进性能优化附属。独立 mixin 附属（非 MTR/YMTR 分支），六项优化全部独立可开关。
+> 支持 MC 1.18.2 / 1.19.2 / 1.19.4 / 1.20.1（Fabric）+ 1.20.1（Forge）。
 
 ## What it does
 
 Large MTR worlds (dozens of trains, hundreds of rails) stress the server tick loop
 and client renderer in ways vanilla MTR/YMTR handles inefficiently. MTR Turbo
-targets the five hottest bottlenecks measured in real saves:
+targets the six hottest bottlenecks measured in real saves:
 
 | # | Optimization | Effect |
 |---|---|---|
@@ -18,30 +18,48 @@ targets the five hottest bottlenecks measured in real saves:
 | U3 | **Render container reuse** — the per-frame rail dedup `HashMap` is reused instead of reallocated | Less GC churn at 60 FPS |
 | U4 | **Server simulation LOD** — trains far from all players simulate at 1/2 or 1/4 rate with proportional tick-steps (manual-driven and passenger-carrying trains never degrade) | Remote trains cost 1/2~1/4 MSPT |
 | U5 | **Schedule rebuild throttle** — platform schedules rebuilt once per 20 ticks instead of every tick, keeping the previous copy in between (no blank window on PIDS/sensors/web) | 1/20 schedule overhead near players |
+| U6 | **Rail position curve cache** — `Rail.getPosition` (87-instruction trig chain, ~270 calls/tick on a 30-train save) replaced by 0.25-block pre-sampled linear interpolation; rails are geometrically immutable so the cache never invalidates | ~270 trig chains per tick eliminated; deviation <0.125 block (visually indistinguishable) |
 
-Every optimization is individually toggleable in `config/MTR Turbo.json`
+Every optimization is individually toggleable in `config/mtr-turbo.json`
 (defaults: all on). Behavior guarantees: manual/occupied trains always simulate
 per-tick; riding trains always render; anti-collision checks degrade at most to
-4-tick spacing (≤5 blocks, shorter than any rail segment).
+4-tick spacing (≤5 blocks, shorter than any rail segment); curve cache deviation
+stays under half the minimum rail texture resolution.
+
+## Measuring it yourself
+
+Run `/mtrturbo stats` (OP/cheats, 1.19.2+ Fabric / 1.20.1 both loaders) for live
+hit counters per optimization, with estimated savings and per-second rates. On any
+version — including 1.18.2 where no command exists — set `statsLogIntervalSeconds`
+in the config (e.g. 300) to log a cumulative line every N seconds for hands-off
+benchmark collection.
 
 ## Status
 
-**v0.1.0** — passed a real server smoke test: full boot to `Done`, MTR data loaded,
-all mixins applied cleanly, tick loop stable across the throttled paths.
+**v1.1.1** — 23 real-server smoke tests across 4 MC versions + 3-way coexistence
+test with ANTE (which rewrites `simulateTrains` — MTR Turbo detects ANTE and
+gracefully hands over only U5, everything else stays active, announced in the log).
+All mixin target signatures bytecode-verified identical across MTR 3.2.2-hotfix-2
+and YMTR 3.6.3/3.6.4.2 (see compatibility-matrix.md in the repo).
 
 ## Requirements
 
-- Minecraft **1.20.1** (Fabric)
-- **MTR 3.2.x or YMTR** (Yomi's Minecraft Transit Railway) — either works; MTR Turbo
-  hooks the shared `mtr` classes
-- Fabric Loader ≥ 0.15
+- Minecraft **1.18.2 / 1.19.2 / 1.19.4 / 1.20.1** (Fabric) or **1.20.1** (Forge)
+- **MTR 3.2.x or YMTR** — either works; MTR Turbo hooks the shared `mtr` classes
+  (1.18.2/1.19.4 builds target official MTR 3.2.2-hotfix-1; 1.19.2 targets YMTR 3.6.2)
+- Fabric Loader ≥ 0.14.21 / Forge 47+
+
+Notes: on 1.18.2/1.19.x the in-game config screen and (1.18.2 only) the stats
+command are unavailable due to older fabric-api — edit `config/mtr-turbo.json`
+manually; the periodic log works everywhere.
 
 ## Compatibility
 
 - Designed against **YMTR 3.6.4.2**; hooks are signature-stable against MTR 3.2.2-family classes (`mtr.data.Train`, `TrainServer`, `TrainClient`, `mtr.data.RailwayData`, `mtr.render.RenderTrains`)
 - If a target class changes in a future YMTR update, the affected optimization fails loudly at startup (mixin `required`) instead of silently misbehaving — check the log
-- Safe alongside ANTE (Continued) and other MTR 3.x addons
+- **Safe alongside ANTE (Continued)** — auto-hands-over the one conflicting mixin (U5), verified in a live 3-way test
+- Safe with other MTR 3.x addons (JCM, YUM etc. — no shared target classes)
 
 ## Source
 
-[GitHub — szkele1145/MTR Turbo](https://github.com/szkele1145/MTR Turbo) (MIT)
+[GitHub — szkele1145/mtr-ultra](https://github.com/szkele1145/mtr-ultra) (MIT)
