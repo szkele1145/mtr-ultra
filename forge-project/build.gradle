@@ -7,8 +7,13 @@ plugins {
 version = project.mod_version
 group = project.maven_group
 
-base {
-	archivesName = project.archives_base_name
+// [命名规范] 产物文件名统一为: mtr-turbo-<mod版本>-1.20.1-forge.jar
+// loom 追加 version 会重复，直接钉死最终名：
+tasks.named('remapJar') {
+	archiveFileName = "mtr-turbo-${project.mod_version}-1.20.1-forge.jar"
+}
+tasks.named('jar') {
+	archiveFileName = "mtr-turbo-${project.mod_version}-1.20.1-forge-dev.jar"
 }
 
 // 仓库声明保持在 loom 插件应用之后（原始布局）：

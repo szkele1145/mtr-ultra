@@ -36,16 +36,24 @@ if (deps == null) {
 	throw new GradleException("Unsupported buildVersion: ${targetMcVersion}. Supported: ${depMatrix.keySet()}")
 }
 
+// [命名规范] 产物文件名统一为: mtr-turbo-<mod版本>-<mc版本>-<加载器>.jar
+// 例: mtr-turbo-1.0.4-1.20.1-fabric.jar
+// loom 的 remapJar 会自动追加 "-${version}"，故 archivesName 不含版本、
+// 由 version 字段拼接中间段：archivesName = "mtr-turbo-${modVer}-${mc}-fabric"
+// 会变成 ...-fabric-1.0.4+1.20.1(版本重复且带+)。改为直接钉死最终名：
+tasks.named('remapJar') {
+	archiveFileName = "mtr-turbo-${project.mod_version}-${targetMcVersion}-fabric.jar"
+}
+tasks.named('jar') {
+	archiveFileName = "mtr-turbo-${project.mod_version}-${targetMcVersion}-fabric-dev.jar"
+}
+
 // [multi-version] 1.19.4 及以下无 GuiGraphics（1.20 引入），ModMenu 配置屏
 // 仅 1.20.x 构建；1.19.x 版本不带配置屏（config/mtr-turbo.json 手编仍可用）
 boolean hasModMenuScreen = targetMcVersion.startsWith("1.20")
 
 version = "${project.mod_version}+${targetMcVersion}"
 group = project.maven_group
-
-base {
-	archivesName = project.archives_base_name
-}
 
 repositories {
 	// 腾讯镜像前置，境内加速；fabric maven 保底（loom 插件依赖与 fabric-api 均在 fabric maven）
