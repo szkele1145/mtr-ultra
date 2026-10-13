@@ -37,7 +37,13 @@ public class MtrUltraConfig {
 
     public static void load() {
         try {
-            configPath = FabricLoader.getInstance().getConfigDir().resolve("mtr-ultra.json");
+            final java.nio.file.Path newPath = FabricLoader.getInstance().getConfigDir().resolve("mtr-turbo.json");
+            // [Turbo] 改名迁移：旧 mtr-ultra.json 存在而新文件不存在时自动搬运（保留用户开关设置）
+            final java.nio.file.Path oldPath = FabricLoader.getInstance().getConfigDir().resolve("mtr-ultra.json");
+            if (!java.nio.file.Files.exists(newPath) && java.nio.file.Files.exists(oldPath)) {
+                java.nio.file.Files.copy(oldPath, newPath);
+            }
+            configPath = newPath;
             if (Files.exists(configPath)) {
                 JsonObject obj = GSON.fromJson(Files.readString(configPath), JsonObject.class);
                 enableDoorScanShortCircuit = get(obj, "enableDoorScanShortCircuit", enableDoorScanShortCircuit);

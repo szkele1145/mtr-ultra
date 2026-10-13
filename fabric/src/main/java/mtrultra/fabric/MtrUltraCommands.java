@@ -24,7 +24,7 @@ public final class MtrUltraCommands {
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	public static void register() {
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-			((CommandDispatcher<CommandSourceStack>) dispatcher).register(Commands.literal("mtrultra")
+			((CommandDispatcher<CommandSourceStack>) dispatcher).register(Commands.literal("mtrturbo")
 					.then(Commands.literal("stats").requires(source -> source.hasPermission(2))
 							.executes(context -> {
 								context.getSource().sendSystemMessage(net.minecraft.network.chat.Component.literal(MtrUltraStats.report()));

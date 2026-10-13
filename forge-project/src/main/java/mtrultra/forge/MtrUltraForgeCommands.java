@@ -14,7 +14,7 @@ import net.minecraftforge.fml.common.Mod;
  * Forge 通过 RegisterCommandsEvent 在服务器启动时注册命令，
  * 无需 fabric-api 的 CommandRegistrationCallback。
  */
-@Mod.EventBusSubscriber(modid = "mtr_ultra")
+@Mod.EventBusSubscriber(modid = "mtr_turbo")
 public final class MtrUltraForgeCommands {
 
 	private MtrUltraForgeCommands() {
@@ -23,7 +23,7 @@ public final class MtrUltraForgeCommands {
 	@SubscribeEvent
 	public static void onRegisterCommands(RegisterCommandsEvent event) {
 		final CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
-		dispatcher.register(Commands.literal("mtrultra")
+		dispatcher.register(Commands.literal("mtrturbo")
 				.then(Commands.literal("stats").requires(source -> source.hasPermission(2))
 						.executes(context -> {
 							context.getSource().sendSystemMessage(net.minecraft.network.chat.Component.literal(MtrUltraStats.report()));

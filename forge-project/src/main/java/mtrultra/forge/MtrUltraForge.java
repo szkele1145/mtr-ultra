@@ -10,7 +10,7 @@ import net.minecraftforge.fml.common.Mod;
  * 注意：Forge 47 的 modId 规则 ^[a-z][a-z0-9_]{1,63}$ 不允许连字符，
  * 故 Forge 版 modId 用下划线（Fabric 版保持 mtr-ultra）。
  */
-@Mod("mtr_ultra")
+@Mod("mtr_turbo")
 public class MtrUltraForge {
 
 	public MtrUltraForge() {

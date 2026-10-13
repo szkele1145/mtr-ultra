@@ -39,7 +39,13 @@ public class MtrUltraConfig {
 
     public static void load() {
         try {
-            configPath = FMLPaths.CONFIGDIR.get().resolve("mtr-ultra.json");
+            final Path newPath = FMLPaths.CONFIGDIR.get().resolve("mtr-turbo.json");
+            // [Turbo] 改名迁移：旧 mtr-ultra.json 自动搬运
+            final Path oldPath = FMLPaths.CONFIGDIR.get().resolve("mtr-ultra.json");
+            if (!Files.exists(newPath) && Files.exists(oldPath)) {
+                Files.copy(oldPath, newPath);
+            }
+            configPath = newPath;
             if (Files.exists(configPath)) {
                 JsonObject obj = GSON.fromJson(Files.readString(configPath), JsonObject.class);
                 enableDoorScanShortCircuit = get(obj, "enableDoorScanShortCircuit", enableDoorScanShortCircuit);

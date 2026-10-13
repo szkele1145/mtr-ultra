@@ -1,9 +1,9 @@
 {
 	"schemaVersion": 1,
-	"id": "mtr-ultra",
+	"id": "mtr-turbo",
 	"version": "${version}",
-	"name": "MTR-Ultra",
-	"description": "Aggressive performance optimizations for Minecraft Transit Railway large worlds - simulation LOD, render culling, schedule throttling | MTR 大存档激进性能优化附属",
+	"name": "MTR Turbo",
+	"description": "Aggressive performance optimizations for large Minecraft Transit Railway worlds - simulation LOD, car render culling, schedule throttling | MTR 大存档性能优化附属（Turbo 加速）",
 	"authors": [
 		"szkele1145"
 	],
@@ -25,12 +25,12 @@
 			"mtrultra.fabric.MtrUltraModMenuApi"
 		]
 	},
-	"suggests": {
-		"modmenu": "*"
-	},
 	"mixins": [
 		"mtr-ultra.mixins.json"
 	],
+	"suggests": {
+		"modmenu": "*"
+	},
 	"depends": {
 		"fabricloader": ">=0.15.0",
 		"minecraft": "1.20.1",

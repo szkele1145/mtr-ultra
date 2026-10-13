@@ -21,7 +21,7 @@ import net.minecraftforge.fml.common.Mod;
  * （纯原版控件，零额外依赖）。服务端 /mtrultra stats 由
  * {@link MtrUltraForgeCommands} 提供。
  */
-@Mod.EventBusSubscriber(modid = "mtr_ultra", value = net.minecraftforge.api.distmarker.Dist.CLIENT)
+@Mod.EventBusSubscriber(modid = "mtr_turbo", value = net.minecraftforge.api.distmarker.Dist.CLIENT)
 public final class MtrUltraForgeClientCommands {
 
 	private MtrUltraForgeClientCommands() {
@@ -30,7 +30,7 @@ public final class MtrUltraForgeClientCommands {
 	@SubscribeEvent
 	public static void onRegisterClientCommands(RegisterClientCommandsEvent event) {
 		final CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
-		dispatcher.register(Commands.literal("mtrultra")
+		dispatcher.register(Commands.literal("mtrturbo")
 				.then(Commands.literal("screen")
 						.executes(context -> {
 							Minecraft.getInstance().tell(() -> Minecraft.getInstance().setScreen(new MtrUltraForgeConfigScreen(null)));
@@ -46,7 +46,7 @@ public final class MtrUltraForgeClientCommands {
 		private final Screen parent;
 
 		public MtrUltraForgeConfigScreen(Screen parent) {
-			super(Component.literal("MTR-Ultra Settings"));
+			super(Component.literal("MTR-Turbo Settings"));
 			this.parent = parent;
 		}
 

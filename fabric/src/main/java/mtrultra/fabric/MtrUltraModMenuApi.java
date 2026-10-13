@@ -29,7 +29,7 @@ public class MtrUltraModMenuApi implements ModMenuApi {
 		private final Screen parent;
 
 		public MtrUltraConfigScreen(Screen parent) {
-			super(Component.literal("MTR-Ultra Settings"));
+			super(Component.literal("MTR-Turbo Settings"));
 			this.parent = parent;
 		}
 

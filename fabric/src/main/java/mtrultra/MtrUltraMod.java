@@ -8,10 +8,10 @@ import org.apache.logging.log4j.Logger;
  */
 public class MtrUltraMod {
 
-	public static final Logger LOGGER = LogManager.getLogger("MTR-Ultra");
+	public static final Logger LOGGER = LogManager.getLogger("MTR-Turbo");
 
 	public static void onInitialize() {
-		LOGGER.info("MTR-Ultra initializing");
+		LOGGER.info("MTR-Turbo initializing");
 		MtrUltraConfig.load();
 	}
 }
