@@ -65,14 +65,17 @@
 2. `/mtrturbo stats` 第一次跑（建立速率基准）；
 3. 站在枢纽站观察 60 秒（列车密度最高处）；
 4. 再次 `/mtrturbo stats` 读 `rates/s`；
-5. 关闭全部开关（改 config）重启，同位置对比 `/spark tps` 或
+5. `/mtrturbo dump` 把标准化 JSON 快照（时间戳/加载器/MC 版本/五计数器）写入
+   `config/mtrturbo-stats.json`——发 Issue 或社区分享基准数据时直接附这个文件，
+   格式统一可跨存档对比（1.1.3+，双加载器）；
+6. 关闭全部开关（改 config）重启，同位置对比 `/spark tps` 或
    `/forge metrics`（Forge）/`/fabric performance`（Fabric）的服务端 tick 曲线。
 
 ## 兼容性矩阵
 
 | 目标 | 兼容性 |
 |---|---|
-| YMTR 3.6.4.2（Fabric/Forge） | ✅ 全部五大优化（实测冒烟通过） |
+| YMTR 3.6.4.2（Fabric/Forge） | ✅ 全部六大优化（实测冒烟通过） |
 | YMTR 3.6.3（公开最新，Fabric/Forge） | ✅ 全部 7 个 mixin 目标签名经 javap 逐项核对一致（2026-10-13 验证） |
 | MTR 3.2.2 官方（含 hotfix-2） | ✅ **全部挂钩签名经 javap 实证一致**（详见 compatibility-matrix.md） |
 | ANTE（续更版） | ✅ **三方实测通过**（YMTR+ANTE+MTR Turbo 同装）：0.2.5 起 IMixinConfigPlugin 检测 ANTE 并自动跳过 U5（ANTE 整体覆写 simulateTrains，硬冲突）；U1-U4 全部照常，启动日志有明确提示 |
