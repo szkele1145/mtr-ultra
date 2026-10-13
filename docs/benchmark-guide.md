@@ -61,6 +61,7 @@
 ## 快速基准流程
 
 1. 备份存档，服务端装 MTR Turbo，OP 加入自己；
+0. （可选，推荐无人值守采集）config 设 statsLogIntervalSeconds: 300，每 5 分钟自动记录一行累计数据；
 2. `/mtrturbo stats` 第一次跑（建立速率基准）；
 3. 站在枢纽站观察 60 秒（列车密度最高处）；
 4. 再次 `/mtrturbo stats` 读 `rates/s`；
