@@ -12,8 +12,11 @@
 ## 下一步（0.3.0 候选）
 
 - 轨道渲染距离分批 + 视锥剔除（`renderRailStandardSafe` 内部，需字节码级调研）
-- 客户端 `Rail.getPosition` 曲率缓存（移植 ANTE 续更版思路）
-- 信号灯 `getBrightness` 按 chunk 缓存 1-2 tick
+- 客户端 `Rail.getPosition` 曲率缓存（**预研完成**：87 条字节码/次，30 列车约 270 次/tick
+  的三角函数链；方案=按 (rail, 弧长步进) 采样点缓存，WeakHashMap 外挂，轨道不可变则缓存永真）
+- 信号灯/轨道渲染 `getBrightness` 短期缓存（**预研完成**：renderRailStandardInternal
+  每轨每帧 newBlockPos+getBrightness×2；方案=BlockPos→packed light 的 1 tick TTL Map，
+  光照更新延迟 1 tick 视觉不可察觉）
 - YMTR 上游更新跟踪（签名变化预警：mixin required 启动即失败，而非静默错乱）
 - 真实大存档 A/B 基准数据收集（用 1.0.5 的日志采集功能，等审核通过后社区协助）
 
