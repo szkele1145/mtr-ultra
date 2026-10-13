@@ -99,6 +99,7 @@ public final class MtrUltraStats {
 			root.addProperty("timestamp", System.currentTimeMillis());
 			root.addProperty("mod", "mtr-turbo");
 			root.addProperty("loader", "forge");
+			root.addProperty("minecraft", guessMcVersion());
 			final com.google.gson.JsonObject counters = new com.google.gson.JsonObject();
 			counters.addProperty("doorScanSkipped", doorScanSkipped.get());
 			counters.addProperty("carsCulled", carsCulled.get());
@@ -112,6 +113,17 @@ public final class MtrUltraStats {
 		} catch (final Exception e) {
 			MtrUltraMod.LOGGER.error("Failed to write stats dump", e);
 			return 0;
+		}
+	}
+
+	/** MC 版本探测（Forge 稳定链： FMLLoader.versionInfo() 不可用时退 unknown） */
+	private static String guessMcVersion() {
+		try {
+			final Object version = net.minecraftforge.fml.loading.FMLLoader.class
+					.getMethod("versionInfo").invoke(null);
+			return String.valueOf(version);
+		} catch (final Throwable t) {
+			return "unknown";
 		}
 	}
 }
