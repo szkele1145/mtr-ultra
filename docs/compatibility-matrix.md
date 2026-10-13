@@ -21,7 +21,7 @@
 
 初版矩阵推断"互不干扰"——**三方实测推翻了它**：
 
-- ANTE 的 `RailwayDataMixin` 整体覆写了 `simulateTrains()`（含其轨道遍历优化），
+- ANTE 的 `RailwayDataMixin` **整体覆写**了 `simulateTrains()`（含其轨道遍历优化），
   MTR-Ultra 对同一方法的 U5 注入在 PREINJECT Applicator 阶段被硬拒绝
   （`merged by` 异常，`require=0` 也无法压制——两次实测确认）；
 - **修复**：`IMixinConfigPlugin`（Fabric: `FabricLoader.isModLoaded("mtrsteamloco")`；
@@ -31,6 +31,19 @@
   U1-U4 全部照常（不同目标类，与 ANTE 的覆写无交集）；
 - **验证**：YMTR 3.6.4.2 + ANTE 1.1.1-continue.2 + MTR-Ultra 0.2.5 三方同装，
   服务器 `Done (13.654s)` 后持续稳定。
+
+### 为什么只有 U5 冲突（mixin 机制分析）
+
+| MTR-Ultra mixin | ANTE 对同类的操作 | 共存性 |
+|---|---|---|
+| RailwayDataMixin（U5） | ANTE **@Overwrite 整个 simulateTrains** | ❌ 覆写挡住一切后续注入 → 跳过 |
+| TrainClientMixin（U2） | ANTE 仅 @Inject HEAD/TAIL（局部钩子） | ✅ 多注入可共存（v4 实测通过） |
+| RenderTrainsMixin（U3） | ANTE 仅 @Inject（render/renderRailStandard 各自钩子） | ✅ 不同方法/不同注入点共存 |
+| TrainServerMixin / TrainMixin | ANTE 未 mixin 这两个类 | ✅ 无交集 |
+
+mixin 机制结论：**@Inject 局部钩子彼此天然共存；@Overwrite（或隐式整方法替换）
+是排他的**——两个 mixin 覆写同一方法必炸，覆写者对所有后来者关门。
+写跨 mod mixin 时，要么只用 @Inject，要么准备好 IMixinConfigPlugin 让位协议。
 
 ## 意义
 
