@@ -1,4 +1,4 @@
-# MTR-Ultra 目标签名兼容矩阵（字节码实证）
+# MTR Turbo 目标签名兼容矩阵（字节码实证）
 
 > 全部 7 个 mixin 挂钩点，对三个目标 mod 版本逐一 javap 核对（2026-10-13）。
 > **结论：MTR 官方 3.2.2-hotfix-2 与 YMTR 3.6.3/3.6.4.2 的全部挂钩签名一致。**
@@ -22,19 +22,19 @@
 初版矩阵推断"互不干扰"——**三方实测推翻了它**：
 
 - ANTE 的 `RailwayDataMixin` **整体覆写**了 `simulateTrains()`（含其轨道遍历优化），
-  MTR-Ultra 对同一方法的 U5 注入在 PREINJECT Applicator 阶段被硬拒绝
+  MTR Turbo 对同一方法的 U5 注入在 PREINJECT Applicator 阶段被硬拒绝
   （`merged by` 异常，`require=0` 也无法压制——两次实测确认）；
 - **修复**：`IMixinConfigPlugin`（Fabric: `FabricLoader.isModLoaded("mtrsteamloco")`；
   Forge: `ModList.get().isLoaded`）检测 ANTE 在场时跳过 U5 的 RailwayDataMixin，
   启动日志输出明确提示；
 - **语义**：U5 让位后排班回到原版每 tick 行为（`ScheduleRebuildFlag` 默认 TRUE），
   U1-U4 全部照常（不同目标类，与 ANTE 的覆写无交集）；
-- **验证**：YMTR 3.6.4.2 + ANTE 1.1.1-continue.2 + MTR-Ultra 0.2.5 三方同装，
+- **验证**：YMTR 3.6.4.2 + ANTE 1.1.1-continue.2 + MTR Turbo 0.2.5 三方同装，
   服务器 `Done (13.654s)` 后持续稳定。
 
 ### 为什么只有 U5 冲突（mixin 机制分析）
 
-| MTR-Ultra mixin | ANTE 对同类的操作 | 共存性 |
+| MTR Turbo mixin | ANTE 对同类的操作 | 共存性 |
 |---|---|---|
 | RailwayDataMixin（U5） | ANTE **@Overwrite 整个 simulateTrains** | ❌ 覆写挡住一切后续注入 → 跳过 |
 | TrainClientMixin（U2） | ANTE 仅 @Inject HEAD/TAIL（局部钩子） | ✅ 多注入可共存（v4 实测通过） |
@@ -47,7 +47,7 @@ mixin 机制结论：**@Inject 局部钩子彼此天然共存；@Overwrite（或
 
 ## 意义
 
-1. MTR-Ultra 对 **MTR 官方 3.2.2 与 YMTR 全线（3.6.3~3.6.4.2）双支持**，
+1. MTR Turbo 对 **MTR 官方 3.2.2 与 YMTR 全线（3.6.3~3.6.4.2）双支持**，
    不是设计推断而是逐签名实证；
 2. YMTR 是官方 MTR 的功能 fork，其 `mtr.data` 核心模拟/渲染类签名长期稳定，
    预计小版本演进继续兼容（若破坏，mixin `required=true` 启动期即报，不会静默）；

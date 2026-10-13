@@ -1,13 +1,13 @@
-# MTR-Ultra — Minecraft Transit Railway 大存档性能优化附属
+# MTR Turbo — Minecraft Transit Railway 大存档性能优化附属
 
 > 独立 mixin 附属 mod（**不是** MTR/YMTR 的分支），挂钩 MTR 3.2.2 / YMTR 3.x（MC 1.20.1，Fabric+Forge）。
 > 目标：让百车多线的大型存档流畅运行。定位激进优化——允许改变渲染/模拟细节行为。
 
 ## 状态
 
-**v0.2.5** — 11 轮真实服务器冒烟 + 三方共存实测（YMTR+ANTE+MTR-Ultra）。
-五大优化全部带独立开关、stats 仪表（`/mtrultra stats`）、双端配置屏
-（Fabric: ModMenu / Forge: `/mtrultra screen`）。
+**v0.2.5** — 11 轮真实服务器冒烟 + 三方共存实测（YMTR+ANTE+MTR Turbo）。
+五大优化全部带独立开关、stats 仪表（`/mtrturbo stats`）、双端配置屏
+（Fabric: ModMenu / Forge: `/mtrturbo screen`）。
 **与 ANTE 共存**：检测到 ANTE 时 U5 自动让位（IMixinConfigPlugin），
 U1-U4 全活跃，启动日志明示。兼容面字节码实证：MTR 官方 3.2.2-hotfix-2
 与 YMTR 3.6.3/3.6.4.2 的全部挂钩签名一致（见 `docs/compatibility-matrix.md`）。
@@ -15,7 +15,7 @@ U1-U4 全活跃，启动日志明示。兼容面字节码实证：MTR 官方 3.2
 ## 架构
 
 ```
-mtr-ultra/
+MTR Turbo/
 ├── build.gradle                # fabric-loom 1.9.2(Gradle 8.11 兼容线)
 ├── forge-project/              # Forge 1.20.1 独立构建(architectury loom 1.9.424)
 │   └── src/main/java/mtrultra/ # Forge 平行 mixin(官方名 target + Forge 入口/命令)
@@ -23,7 +23,7 @@ mtr-ultra/
 └── fabric/src/main/
     ├── java/mtrultra/
     │   ├── MtrUltraMod.java        # 入口(LOGGER + Config 加载)
-    │   ├── MtrUltraConfig.java     # 配置:每项优化独立开关, config/mtr-ultra.json 持久化
+    │   ├── MtrUltraConfig.java     # 配置:每项优化独立开关, config/MTR Turbo.json 持久化
     │   ├── MtrUltraStats.java      # stats 仪表(AtomicLong 计数 + 速率)
     │   ├── fabric/                 # Fabric 入口 + stats 命令 + ModMenu 配置屏
     │   ├── mixin/
@@ -38,7 +38,7 @@ mtr-ultra/
     │   └── util/ScheduleRebuildFlag.java      # U5 节拍广播(mixin 包外!见类注释)
     └── resources/
         ├── fabric.mod.json
-        ├── mtr-ultra.mixins.json   # 含 plugin 字段
+        ├── MTR Turbo.mixins.json   # 含 plugin 字段
         └── icon.png
 ```
 
@@ -59,14 +59,14 @@ mtr-ultra/
 - 骑乘者所在列车豁免渲染剔除（U2）；
 - **与 ANTE 共存**：检测到 ANTE 自动禁用 U5（IMixinConfigPlugin），U1-U4 全活跃（三方实测）；
 - 每项可单独关闭（`enableDoorScanShortCircuit` / `enableCarRenderCulling` / `enableRailDedupNoAlloc` / `enableSimulationLod` / `enableScheduleThrottle`）；
-- `/mtrultra stats`（OP）实时查看各优化命中数与节省估算；Fabric 经 ModMenu / Forge 经 `/mtrultra screen` 可视化调参。
+- `/mtrturbo stats`（OP）实时查看各优化命中数与节省估算；Fabric 经 ModMenu / Forge 经 `/mtrturbo screen` 可视化调参。
 
 ## 构建
 
 需要 JDK 17 与 Gradle 8.11（wrapper 已配置腾讯镜像），本地代理已在 gradle.properties 预置。
 
 ```
-gradlew build   # Fabric 产物 build/libs/mtr-ultra-<ver>.jar
+gradlew build   # Fabric 产物 build/libs/MTR Turbo-<ver>.jar
 cd forge-project && gradlew build   # Forge 产物
 ```
 

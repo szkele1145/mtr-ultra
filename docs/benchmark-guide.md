@@ -1,6 +1,6 @@
-# MTR-Ultra 性能基准与 stats 解读指南
+# MTR Turbo 性能基准与 stats 解读指南
 
-> 配合 `/mtrultra stats` 命令（0.2.0+）使用。所有数字来自源码级分析与
+> 配合 `/mtrturbo stats` 命令（0.2.0+）使用。所有数字来自源码级分析与
 > 30 列 8 车厢存档的典型形态（YMTR 3.6.4.2，MC 1.20.1）。
 
 ## 各优化的理论收益
@@ -60,10 +60,10 @@
 
 ## 快速基准流程
 
-1. 备份存档，服务端装 MTR-Ultra，OP 加入自己；
-2. `/mtrultra stats` 第一次跑（建立速率基准）；
+1. 备份存档，服务端装 MTR Turbo，OP 加入自己；
+2. `/mtrturbo stats` 第一次跑（建立速率基准）；
 3. 站在枢纽站观察 60 秒（列车密度最高处）；
-4. 再次 `/mtrultra stats` 读 `rates/s`；
+4. 再次 `/mtrturbo stats` 读 `rates/s`；
 5. 关闭全部开关（改 config）重启，同位置对比 `/spark tps` 或
    `/forge metrics`（Forge）/`/fabric performance`（Fabric）的服务端 tick 曲线。
 
@@ -74,7 +74,7 @@
 | YMTR 3.6.4.2（Fabric/Forge） | ✅ 全部五大优化（实测冒烟通过） |
 | YMTR 3.6.3（公开最新，Fabric/Forge） | ✅ 全部 7 个 mixin 目标签名经 javap 逐项核对一致（2026-10-13 验证） |
 | MTR 3.2.2 官方（含 hotfix-2） | ✅ **全部挂钩签名经 javap 实证一致**（详见 compatibility-matrix.md） |
-| ANTE（续更版） | ✅ **三方实测通过**（YMTR+ANTE+MTR-Ultra 同装）：0.2.5 起 IMixinConfigPlugin 检测 ANTE 并自动跳过 U5（ANTE 整体覆写 simulateTrains，硬冲突）；U1-U4 全部照常，启动日志有明确提示 |
+| ANTE（续更版） | ✅ **三方实测通过**（YMTR+ANTE+MTR Turbo 同装）：0.2.5 起 IMixinConfigPlugin 检测 ANTE 并自动跳过 U5（ANTE 整体覆写 simulateTrains，硬冲突）；U1-U4 全部照常，启动日志有明确提示 |
 | JCM/YUM 等附属 | ✅ 无共享类（它们挂的是 mtr.block/mtr.client，与 U1-U5 目标无交集） |
 
 > 若未来 YMTR 更新改变目标方法签名：相关 mixin 会在启动期大声失败

@@ -1,4 +1,4 @@
-# MTR-Ultra
+# MTR Turbo
 
 Aggressive performance optimizations for large **Minecraft Transit Railway** worlds — simulation LOD, car-level render culling, schedule throttling. Works on top of MTR 3.2.x / YMTR (Yomi's MTR) on MC 1.20.1 Fabric.
 
@@ -8,7 +8,7 @@ Aggressive performance optimizations for large **Minecraft Transit Railway** wor
 ## What it does
 
 Large MTR worlds (dozens of trains, hundreds of rails) stress the server tick loop
-and client renderer in ways vanilla MTR/YMTR handles inefficiently. MTR-Ultra
+and client renderer in ways vanilla MTR/YMTR handles inefficiently. MTR Turbo
 targets the five hottest bottlenecks measured in real saves:
 
 | # | Optimization | Effect |
@@ -19,7 +19,7 @@ targets the five hottest bottlenecks measured in real saves:
 | U4 | **Server simulation LOD** — trains far from all players simulate at 1/2 or 1/4 rate with proportional tick-steps (manual-driven and passenger-carrying trains never degrade) | Remote trains cost 1/2~1/4 MSPT |
 | U5 | **Schedule rebuild throttle** — platform schedules rebuilt once per 20 ticks instead of every tick, keeping the previous copy in between (no blank window on PIDS/sensors/web) | 1/20 schedule overhead near players |
 
-Every optimization is individually toggleable in `config/mtr-ultra.json`
+Every optimization is individually toggleable in `config/MTR Turbo.json`
 (defaults: all on). Behavior guarantees: manual/occupied trains always simulate
 per-tick; riding trains always render; anti-collision checks degrade at most to
 4-tick spacing (≤5 blocks, shorter than any rail segment).
@@ -32,7 +32,7 @@ all mixins applied cleanly, tick loop stable across the throttled paths.
 ## Requirements
 
 - Minecraft **1.20.1** (Fabric)
-- **MTR 3.2.x or YMTR** (Yomi's Minecraft Transit Railway) — either works; MTR-Ultra
+- **MTR 3.2.x or YMTR** (Yomi's Minecraft Transit Railway) — either works; MTR Turbo
   hooks the shared `mtr` classes
 - Fabric Loader ≥ 0.15
 
@@ -44,4 +44,4 @@ all mixins applied cleanly, tick loop stable across the throttled paths.
 
 ## Source
 
-[GitHub — szkele1145/mtr-ultra](https://github.com/szkele1145/mtr-ultra) (MIT)
+[GitHub — szkele1145/MTR Turbo](https://github.com/szkele1145/MTR Turbo) (MIT)

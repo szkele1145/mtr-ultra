@@ -1,4 +1,4 @@
-# MTR-Ultra 路线图
+# MTR Turbo 路线图
 
 ## 0.1.0 ✅（已发布，Fabric，Modrinth beta 审核中）
 
@@ -9,7 +9,7 @@ U1-U5 五大优化 + 真实服务器冒烟测试通过 + GitHub/Modrinth 双发�
 | 项 | 状态 |
 |---|---|
 | Forge 1.20.1 版（forge-project，双端 mixin target 适配） | 🔄 子代理实现中 |
-| 性能仪表：`/mtrultra stats` 命令——输出各优化实时命中数（剔除车厢计数、跳过 tick 计数、短路扫描计数、排班跳过计数） | 📋 |
+| 性能仪表：`/mtrturbo stats` 命令——输出各优化实时命中数（剔除车厢计数、跳过 tick 计数、短路扫描计数、排班跳过计数） | 📋 |
 | ModMenu 配置 GUI（Fabric）/ Forge 配置屏 | 📋 |
 | 大存档实测基准报告（30+ 列存档：帧率/MSPT 前后对比） | 📋 |
 
