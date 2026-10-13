@@ -12,13 +12,17 @@
 ## 下一步（0.3.0 候选）
 
 - 轨道渲染距离分批 + 视锥剔除（`renderRailStandardSafe` 内部，需字节码级调研）
-- 客户端 `Rail.getPosition` 曲率缓存（**预研完成**：87 条字节码/次，30 列车约 270 次/tick
-  的三角函数链；方案=按 (rail, 弧长步进) 采样点缓存，WeakHashMap 外挂，轨道不可变则缓存永真）
+- ~~Rail.render 回调闭包分配优化~~（**预研纠错**：发布 jar 常量池无 `Rail;render` 调用点——
+  常规 TRAIN 走 renderRailStandardInternal 直接画（U3 已覆盖），rail.render 回调是
+  CABLE_CAR 专用且通常个位数轨道，收益可忽略。不实施）
 - ~~信号灯/轨道渲染 `getBrightness` 短期缓存~~（**预研纠错**：YMTR/官方发布 jar 的
   RenderTrains 常量池均无 getBrightness——此前结论误读自 yomis-mtr 源码树
   （≠YMTR 发布版）。轨道渲染是纯顶点提交无光照采样，此优化点不存在）
 - YMTR 上游更新跟踪（签名变化预警：mixin required 启动即失败，而非静默错乱）
 - 真实大存档 A/B 基准数据收集（用 1.0.5 的日志采集功能，等审核通过后社区协助）
+
+> 预研纪律记录：getBrightness 与 rail.render 两候选点均被发布 jar 字节码验证否决
+> （第四次、第五次教训：源码树 ≠ 发布物，每个优化点实施前必须 javap 发布 jar）。
 
 ## 设计原则
 
