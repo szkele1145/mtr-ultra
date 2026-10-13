@@ -18,6 +18,19 @@
 | K | Button.builder(Component, OnPress) 参数顺序 | ✅ javap 核对正确 |
 | L | drawCenteredString(Font, Component, x, y, color) | ✅ javap 核对正确 |
 
+## 1.1.x 审查（U6 曲率缓存新代码）
+
+| # | 审查点 | 结论 |
+|---|---|---|
+| M | U6 缓存表 ThreadLocal 弱键——客户端渲染/服务端 tick 独立表，轨道移除后可回收 | ✅ 安全 |
+| N | 采样数组构建的越界（progress 上界钳制 len-STEP；n≥2 防除零） | ✅ 已钳制 |
+| O | 插值端点 idx+1 越界（Math.min 封顶） | ✅ 安全 |
+| P | 缓存永真前提——Rail 几何不可变（MTR 编辑轨道重建实例，弱键旧表自动失联） | ✅ 成立（无失效逻辑需要的前提） |
+| Q | 精度上界——0.25 格步长线性插值偏差 <0.125 格 vs 轨道纹理最小 1 格 | ✅ 视觉不可辨（数学推导在 mixin 注释） |
+| R | RailPositionCacheMixin @Redirect 与 U4/U5 的 TrainServer mixin 无同方法冲突（getRoutePosition 是 Train 的方法，其余挂 simulateTrain/calculateCar） | ✅ 无交集 |
+| S | 双端描述符——Fabric `class_243` / Forge `net/minecraft/world/phys/Vec3`（1.18.2~1.20.1 逐字核对偏移 72） | ✅ javap 实证 |
+| T | stats 接入的 add() 在 Redirect handler 尾部（未启用缓存时直接 return 原始调用，不计数——语义正确：只统计缓存命中） | ✅ 语义正确 |
+
 ## 历史审查修复回顾
 
 - **0.2.2**：LOD `near < mid` 钳制（手编 JSON 可使分级永假）+ `period >= 1`（取模崩溃）
