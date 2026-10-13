@@ -1,6 +1,7 @@
-﻿
+
 build/
 .gradle/
 run/
 
 run-1201/
+run-192/
