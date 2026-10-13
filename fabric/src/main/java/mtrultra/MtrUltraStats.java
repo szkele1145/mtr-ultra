@@ -25,10 +25,12 @@ public final class MtrUltraStats {
 	public static final AtomicLong carsCulled = new AtomicLong();
 	public static final AtomicLong simTicksSkipped = new AtomicLong();
 	public static final AtomicLong scheduleWritesSkipped = new AtomicLong();
+	// [1.1.1] U6 曲率缓存命中（每次插值查询计 1；对比原始 87 条字节码重算）
+	public static final AtomicLong railPositionCached = new AtomicLong();
 
 	/** 上次 stats 读取的快照（用于计算速率） */
 	private static long lastReadTime = 0;
-	private static long lastDoorScan, lastCarsCulled, lastSimTicks, lastScheduleWrites;
+	private static long lastDoorScan, lastCarsCulled, lastSimTicks, lastScheduleWrites, lastRailPosition;
 
 	/** [1.0.5] 周期日志的下次输出时刻（毫秒），0=功能未启用 */
 	private static volatile long nextLogAt = 0;
@@ -68,11 +70,12 @@ public final class MtrUltraStats {
 		final long c = carsCulled.get();
 		final long s = simTicksSkipped.get();
 		final long w = scheduleWritesSkipped.get();
+		final long rp = railPositionCached.get();
 
 		final double dt = lastReadTime == 0 ? 0 : (now - lastReadTime) / 1000.0;
 		final String rates = dt > 0
-				? String.format(" | rates/s: scan=%.0f car=%.1f tick=%.1f sched=%.1f",
-				(d - lastDoorScan) / dt, (c - lastCarsCulled) / dt, (s - lastSimTicks) / dt, (w - lastScheduleWrites) / dt)
+				? String.format(" | rates/s: scan=%.0f car=%.1f tick=%.1f sched=%.1f railpos=%.0f",
+				(d - lastDoorScan) / dt, (c - lastCarsCulled) / dt, (s - lastSimTicks) / dt, (w - lastScheduleWrites) / dt, (rp - lastRailPosition) / dt)
 				: "";
 
 		lastReadTime = now;
@@ -80,8 +83,9 @@ public final class MtrUltraStats {
 		lastCarsCulled = c;
 		lastSimTicks = s;
 		lastScheduleWrites = w;
+		lastRailPosition = rp;
 
-		return String.format("MTR-Turbo stats: scanDoorsShorted=%d (~%d block reads saved) | carsCulled=%d | simTicksSkipped=%d | scheduleWritesSkipped=%d%s",
-				d, d * 600, c, s, w, rates);
+		return String.format("MTR-Turbo stats: scanDoorsShorted=%d (~%d block reads saved) | carsCulled=%d | simTicksSkipped=%d | scheduleWritesSkipped=%d | railPositionCached=%d (~%d trig chains saved)%s",
+				d, d * 600, c, s, w, rp, rp, rates);
 	}
 }

@@ -64,6 +64,7 @@ public abstract class RailPositionCacheMixin {
 		final double frac = (p - idx * STEP) / STEP;
 		final Vec3 a = samples[idx];
 		final Vec3 b = samples[Math.min(idx + 1, samples.length - 1)];
+		MtrUltraStats.add(MtrUltraStats.railPositionCached);
 		return new Vec3(
 				a.x + (b.x - a.x) * frac,
 				a.y + (b.y - a.y) * frac,
