@@ -13,5 +13,6 @@ public class MtrUltraMod {
 	public static void onInitialize() {
 		LOGGER.info("MTR-Turbo initializing");
 		MtrUltraConfig.load();
+		MtrUltraStats.initPeriodicLog();
 	}
 }

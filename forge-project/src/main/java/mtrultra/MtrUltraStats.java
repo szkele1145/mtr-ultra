@@ -6,7 +6,12 @@ import java.util.concurrent.atomic.AtomicLong;
  * [0.2.0] 性能仪表：各优化的实时命中计数器。
  * <p>
  * 由各 mixin handler 用 {@link #add} 累加（多线程安全：客户端渲染线程与服务端
- * tick 线程都可能命中），{@code /mtrultra stats} 命令读取快照。
+ * tick 线程都可能命中），{@code /mtrturbo stats} 命令读取快照。
+ * <p>
+ * [1.0.5] 周期日志输出：{@code statsLogIntervalSeconds} 配置 > 0 时，每 N 秒
+ * 向日志（INFO 级）输出一行累计报告——1.18.2/1.19.x 版本没有 stats 命令与
+ * 配置屏，这是旧版本用户查看优化命中的唯一入口；1.20.x 用户也可用它做
+ * 无人值守采集。默认关闭（0）。
  * <p>
  * 计数器按优化编号命名，语义：
  * - doorScanSkipped: U1 开门窗口外被短路的 scanDoors 次数（每省一次≈600 格方块读取）
@@ -25,11 +30,35 @@ public final class MtrUltraStats {
 	private static long lastReadTime = 0;
 	private static long lastDoorScan, lastCarsCulled, lastSimTicks, lastScheduleWrites;
 
+	/** [1.0.5] 周期日志的下次输出时刻（毫秒），0=功能未启用 */
+	private static volatile long nextLogAt = 0;
+
 	private MtrUltraStats() {
 	}
 
 	public static void add(AtomicLong counter) {
 		counter.incrementAndGet();
+		// [1.0.5] 热路径顺带检查周期日志（读一个 volatile + 一次时间调用，
+		// 未到期时开销可忽略；到期时输出并顺延——add 调用频率远高于日志周期，
+		// 不需要独立调度线程）
+		final long at = nextLogAt;
+		if (at != 0) {
+			final long now = System.currentTimeMillis();
+			if (now >= at) {
+				nextLogAt = now + MtrUltraConfig.statsLogIntervalSeconds * 1000L;
+				MtrUltraMod.LOGGER.info(report());
+			}
+		}
+	}
+
+	/** [1.0.5] 配置加载后调用：interval<=0 关闭（保持 0），否则立即开始首个周期 */
+	public static void initPeriodicLog() {
+		if (MtrUltraConfig.statsLogIntervalSeconds > 0) {
+			nextLogAt = System.currentTimeMillis();
+			MtrUltraMod.LOGGER.info("MTR-Turbo periodic stats logging every {}s", MtrUltraConfig.statsLogIntervalSeconds);
+		} else {
+			nextLogAt = 0;
+		}
 	}
 
 	/** 生成一行人类可读的累计+速率报告，并重置速率基准 */

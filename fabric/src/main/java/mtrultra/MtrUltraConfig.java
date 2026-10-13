@@ -32,6 +32,10 @@ public class MtrUltraConfig {
     public static boolean enableScheduleThrottle = true;
     public static int scheduleRebuildTicks = 20;
 
+    // [1.0.5] 周期性把优化命中数写进日志（秒；0=关闭）。
+    // 1.18.2/1.19.x 没有命令/配置屏，这是旧版本查看 stats 的唯一入口
+    public static int statsLogIntervalSeconds = 0;
+
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static Path configPath;
 
@@ -54,6 +58,7 @@ public class MtrUltraConfig {
                 simulationLodMidBlocks = get(obj, "simulationLodMidBlocks", simulationLodMidBlocks);
                 enableScheduleThrottle = get(obj, "enableScheduleThrottle", enableScheduleThrottle);
                 scheduleRebuildTicks = get(obj, "scheduleRebuildTicks", scheduleRebuildTicks);
+                statsLogIntervalSeconds = get(obj, "statsLogIntervalSeconds", statsLogIntervalSeconds);
                 // [0.2.2] 加载期一致性钳制：LOD 分级三目逻辑要求 near < mid；
                 // 手编 JSON 可能写出 near>=mid（此时分级永假=全部按 mid 档处理），
                 // scheduleRebuildTicks 至少为 1（0 会取模崩溃）
@@ -77,6 +82,7 @@ public class MtrUltraConfig {
             obj.addProperty("simulationLodMidBlocks", simulationLodMidBlocks);
             obj.addProperty("enableScheduleThrottle", enableScheduleThrottle);
             obj.addProperty("scheduleRebuildTicks", scheduleRebuildTicks);
+            obj.addProperty("statsLogIntervalSeconds", statsLogIntervalSeconds);
             Files.writeString(configPath, GSON.toJson(obj));
         } catch (Exception e) {
             MtrUltraMod.LOGGER.error("Failed to save config", e);
