@@ -1,0 +1,7 @@
+{
+  "port": 8890,
+  "allowLanAccess": false,
+  "loginTokenTtlSeconds": 120,
+  "sessionTtlHours": 0,
+  "permissions": {}
+}

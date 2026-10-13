@@ -1,0 +1,133 @@
+[10:07:40] [main/INFO] (FabricLoader/GameProvider) Loading Minecraft 1.20.1 with Fabric Loader 0.15.11
+[10:07:40] [main/INFO] (FabricLoader) Loading 49 mods:
+	- architectury 9.2.14
+	- fabric-api 0.92.2+1.20.1
+	- fabric-api-base 0.4.31+1802ada577
+	- fabric-api-lookup-api-v1 1.6.36+1802ada577
+	- fabric-biome-api-v1 13.0.13+1802ada577
+	- fabric-block-api-v1 1.0.11+1802ada577
+	- fabric-block-view-api-v2 1.0.1+1802ada577
+	- fabric-command-api-v1 1.2.34+f71b366f77
+	- fabric-command-api-v2 2.2.13+1802ada577
+	- fabric-commands-v0 0.2.51+df3654b377
+	- fabric-containers-v0 0.1.64+df3654b377
+	- fabric-content-registries-v0 4.0.11+1802ada577
+	- fabric-convention-tags-v1 1.5.5+1802ada577
+	- fabric-crash-report-info-v1 0.2.19+1802ada577
+	- fabric-data-attachment-api-v1 1.0.0+de0fd6d177
+	- fabric-data-generation-api-v1 12.3.4+1802ada577
+	- fabric-dimensions-v1 2.1.54+1802ada577
+	- fabric-entity-events-v1 1.6.0+1c78457f77
+	- fabric-events-interaction-v0 0.6.2+1802ada577
+	- fabric-events-lifecycle-v0 0.2.63+df3654b377
+	- fabric-game-rule-api-v1 1.0.40+1802ada577
+	- fabric-gametest-api-v1 1.2.13+1802ada577
+	- fabric-item-api-v1 2.1.28+1802ada577
+	- fabric-item-group-api-v1 4.0.12+1802ada577
+	- fabric-lifecycle-events-v1 2.2.22+1802ada577
+	- fabric-loot-api-v2 1.2.1+1802ada577
+	- fabric-loot-tables-v1 1.1.45+9e7660c677
+	- fabric-message-api-v1 5.1.9+1802ada577
+	- fabric-mining-level-api-v1 2.1.50+1802ada577
+	- fabric-networking-api-v1 1.3.11+1802ada577
+	- fabric-networking-v0 0.3.51+df3654b377
+	- fabric-object-builder-api-v1 11.1.3+1802ada577
+	- fabric-particles-v1 1.1.2+1802ada577
+	- fabric-recipe-api-v1 1.0.21+1802ada577
+	- fabric-registry-sync-v0 2.3.3+1802ada577
+	- fabric-rendering-data-attachment-v1 0.3.37+92a0d36777
+	- fabric-rendering-fluids-v1 3.0.28+1802ada577
+	- fabric-resource-conditions-api-v1 2.3.8+1802ada577
+	- fabric-resource-loader-v0 0.11.10+1802ada577
+	- fabric-screen-handler-api-v1 1.3.30+1802ada577
+	- fabric-transfer-api-v1 3.3.5+8dd72ea377
+	- fabric-transitive-access-wideners-v1 4.3.1+1802ada577
+	- fabricloader 0.15.11
+	- java 17
+	- minecraft 1.20.1
+	- mixinextras 0.3.5
+	- mtr 1.20.1-3.6.4.2
+	- mtr-turbo 1.0.0
+	- mtrsteamloco 1.1.1-continue.2+1.20.1
+[10:07:56] [main/INFO] (FabricLoader/Mixin) SpongePowered MIXIN Subsystem Version=0.8.5 Source=file:/C:/Users/%e4%b8%80%e5%8f%aa%e5%b1%91/.gradle/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.13.3+mixin.0.8.5/9527e6b0d2449408958fd1302594dc65ec5ade9c/sponge-mixin-0.13.3+mixin.0.8.5.jar Service=Knot/Fabric Env=SERVER
+[10:07:57] [main/INFO] (FabricLoader/Mixin) Loaded Fabric development mappings for mixin remapper!
+[10:07:57] [main/INFO] (FabricLoader/Mixin) Compatibility level set to JAVA_17
+[10:07:58] [main/INFO] (FabricLoader/MixinExtras|Service) Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.3.5).
+[10:08:12] [main/INFO] (MTR-Turbo) MTR-Turbo initializing
+[10:08:13] [main/ERROR] (Minecraft) No data fixer registered for seat
+[10:08:13] [main/ERROR] (Minecraft) No data fixer registered for lift_2_2
+[10:08:13] [main/ERROR] (Minecraft) No data fixer registered for lift_2_2_double_sided
+[10:08:13] [main/ERROR] (Minecraft) No data fixer registered for lift_3_2
+[10:08:13] [main/ERROR] (Minecraft) No data fixer registered for lift_3_2_double_sided
+[10:08:13] [main/ERROR] (Minecraft) No data fixer registered for lift_3_3
+[10:08:13] [main/ERROR] (Minecraft) No data fixer registered for lift_3_3_double_sided
+[10:08:13] [main/ERROR] (Minecraft) No data fixer registered for lift_4_3
+[10:08:13] [main/ERROR] (Minecraft) No data fixer registered for lift_4_3_double_sided
+[10:08:13] [main/ERROR] (Minecraft) No data fixer registered for lift_4_4
+[10:08:13] [main/ERROR] (Minecraft) No data fixer registered for lift_4_4_double_sided
+[10:08:13] [main/INFO] (log) Logging initialized @34081ms to mtr.libraries.org.eclipse.jetty.util.log.Slf4jLog
+[10:08:14] [main/INFO] (MTR-ANTE) MTR-ANTE 1.1.1-continue.2+1.20.1 built at 2026-10-13T07:03:48+08:00[Asia/Shanghai]
+[10:08:14] [main/INFO] (Minecraft) Environment: authHost='https://authserver.mojang.com', accountsHost='https://api.mojang.com', sessionHost='https://sessionserver.mojang.com', servicesHost='https://api.minecraftservices.com', name='PROD'
+[10:08:18] [main/INFO] (Minecraft) Loaded 7 recipes
+[10:08:18] [main/INFO] (Minecraft) Loaded 1271 advancements
+[10:08:19] [main/INFO] (BiomeModificationImpl) Applied 0 biome modifications to 0 of 64 new biomes in 2.234 ms
+[10:08:20] [Server thread/INFO] (Server) jetty-9.4.59-SNAPSHOT; built: 2025-10-10T13:12:53.021Z; git: 0c4120eaa879c7ccac8d6c99b203c19d42dd0bbe; jvm 17.0.19+10-LTS
+[10:08:20] [Server thread/INFO] (ContextHandler) Started m.l.o.e.j.s.ServletContextHandler@262dc6e0{/,jar:file:/F:/vibe%20coding工程/mtr-ultra/.gradle/loom-cache/remapped_mods/loom_mappings_1_20_1_layered_hash_2198_v2/unspecified/ymtr-fabric-1.20.1/ea87d105dc43/ymtr-fabric-1.20.1-ea87d105dc43.jar!/assets/mtr/website/,AVAILABLE}
+[10:08:20] [Server thread/INFO] (AbstractConnector) Started ServerConnector@20457c4d{HTTP/1.1, (http/1.1)}{0.0.0.0:8888}
+[10:08:20] [Server thread/INFO] (Server) Started @40974ms
+[10:08:20] [Server thread/INFO] (Minecraft) [STDOUT]: [MTR-WebDashboard] Settings loaded: port=8890, allowLanAccess=false, loginTokenTtlSeconds=120, sessionTtlHours=0, permissionEntries=0
+[10:08:20] [Server thread/INFO] (Minecraft) [STDOUT]: [MTR-WebDashboard] Resource root jar:file:/F:/vibe%20coding工程/mtr-ultra/.gradle/loom-cache/remapped_mods/loom_mappings_1_20_1_layered_hash_2198_v2/unspecified/ymtr-fabric-1.20.1/ea87d105dc43/ymtr-fabric-1.20.1-ea87d105dc43.jar!/assets/mtr/webdashboard/ (exists=true, directory=true, index.html=true)
+[10:08:20] [Server thread/INFO] (Minecraft) [STDOUT]: [MTR-WebDashboard] Registered API paths: /api/status, /api/health, /api/session, /api/login, /api/logout, /api/meta, /api/data; writing: PATCH /api/station/<id>, /api/route/<id>, /api/depot/<id>; everything else is served as a static file.
+[10:08:20] [Server thread/INFO] (Server) jetty-9.4.59-SNAPSHOT; built: 2025-10-10T13:12:53.021Z; git: 0c4120eaa879c7ccac8d6c99b203c19d42dd0bbe; jvm 17.0.19+10-LTS
+[10:08:20] [Server thread/INFO] (ContextHandler) Started m.l.o.e.j.s.ServletContextHandler@397da75a{/,jar:file:/F:/vibe%20coding工程/mtr-ultra/.gradle/loom-cache/remapped_mods/loom_mappings_1_20_1_layered_hash_2198_v2/unspecified/ymtr-fabric-1.20.1/ea87d105dc43/ymtr-fabric-1.20.1-ea87d105dc43.jar!/assets/mtr/webdashboard/,AVAILABLE}
+[10:08:20] [Server thread/INFO] (AbstractConnector) Started ServerConnector@6ec31694{HTTP/1.1, (http/1.1)}{127.0.0.1:8890}
+[10:08:20] [Server thread/INFO] (Server) Started @41198ms
+[10:08:20] [Server thread/INFO] (Minecraft) [STDOUT]: [MTR-WebDashboard] Listening on http://127.0.0.1:8890/
+[10:08:20] [Server thread/INFO] (Minecraft) Starting minecraft server version 1.20.1
+[10:08:20] [Server thread/INFO] (Minecraft) Loading properties
+[10:08:20] [Server thread/INFO] (Minecraft) Default game type: SURVIVAL
+[10:08:20] [Server thread/INFO] (Minecraft) Generating keypair
+[10:08:20] [Server thread/INFO] (Minecraft) Starting Minecraft server on *:25565
+[10:08:20] [Server thread/INFO] (Minecraft) Using default channel type
+[10:08:21] [Server thread/INFO] (Minecraft) Preparing level "world"
+[10:08:22] [Server thread/INFO] (Minecraft) Preparing start region for dimension minecraft:overworld
+[10:08:24] [Worker-Main-7/INFO] (Minecraft) Preparing spawn area: 0%
+[10:08:24] [Worker-Main-6/INFO] (Minecraft) Preparing spawn area: 0%
+[10:08:24] [Worker-Main-7/INFO] (Minecraft) Preparing spawn area: 0%
+[10:08:24] [Worker-Main-7/INFO] (Minecraft) Preparing spawn area: 0%
+[10:08:24] [Worker-Main-11/INFO] (Minecraft) Preparing spawn area: 0%
+[10:08:25] [Worker-Main-5/INFO] (Minecraft) Preparing spawn area: 0%
+[10:08:25] [Worker-Main-3/INFO] (Minecraft) Preparing spawn area: 0%
+[10:08:26] [Worker-Main-5/INFO] (Minecraft) Preparing spawn area: 0%
+[10:08:26] [Worker-Main-9/INFO] (Minecraft) Preparing spawn area: 0%
+[10:08:27] [Worker-Main-11/INFO] (Minecraft) Preparing spawn area: 0%
+[10:08:27] [Worker-Main-7/INFO] (Minecraft) Preparing spawn area: 1%
+[10:08:28] [Worker-Main-7/INFO] (Minecraft) Preparing spawn area: 4%
+[10:08:28] [Worker-Main-6/INFO] (Minecraft) Preparing spawn area: 7%
+[10:08:29] [Worker-Main-8/INFO] (Minecraft) Preparing spawn area: 7%
+[10:08:29] [Worker-Main-1/INFO] (Minecraft) Preparing spawn area: 7%
+[10:08:30] [Worker-Main-1/INFO] (Minecraft) Preparing spawn area: 7%
+[10:08:30] [Worker-Main-3/INFO] (Minecraft) Preparing spawn area: 9%
+[10:08:31] [Worker-Main-11/INFO] (Minecraft) Preparing spawn area: 22%
+[10:08:31] [Worker-Main-5/INFO] (Minecraft) Preparing spawn area: 22%
+[10:08:32] [Worker-Main-6/INFO] (Minecraft) Preparing spawn area: 26%
+[10:08:32] [Worker-Main-6/INFO] (Minecraft) Preparing spawn area: 43%
+[10:08:33] [Worker-Main-3/INFO] (Minecraft) Preparing spawn area: 60%
+[10:08:33] [Worker-Main-8/INFO] (Minecraft) Preparing spawn area: 72%
+[10:08:34] [Worker-Main-8/INFO] (Minecraft) Preparing spawn area: 77%
+[10:08:34] [Worker-Main-9/INFO] (Minecraft) Preparing spawn area: 85%
+[10:08:35] [Worker-Main-3/INFO] (Minecraft) Preparing spawn area: 96%
+[10:08:35] [Server thread/INFO] (Minecraft) Time elapsed: 12616 ms
+[10:08:35] [Server thread/INFO] (Minecraft) Done (13.800s)! For help, type "help"
+[10:08:35] [Server thread/INFO] (Minecraft) [STDOUT]: Minecraft Transit Railway data successfully loaded for minecraft:overworld
+[10:08:35] [Server thread/INFO] (Minecraft) [STDOUT]: Dynamp is not loaded
+[10:08:35] [Server thread/INFO] (Minecraft) [STDOUT]: BlueMap is not loaded
+[10:08:35] [Server thread/INFO] (Minecraft) [STDOUT]: Squaremap is not loaded
+[10:08:35] [Server thread/INFO] (Minecraft) [STDOUT]: Minecraft Transit Railway data successfully loaded for minecraft:the_nether
+[10:08:35] [Server thread/INFO] (Minecraft) [STDOUT]: Dynamp is not loaded
+[10:08:35] [Server thread/INFO] (Minecraft) [STDOUT]: BlueMap is not loaded
+[10:08:35] [Server thread/INFO] (Minecraft) [STDOUT]: Squaremap is not loaded
+[10:08:35] [Server thread/INFO] (Minecraft) [STDOUT]: Minecraft Transit Railway data successfully loaded for minecraft:the_end
+[10:08:35] [Server thread/INFO] (Minecraft) [STDOUT]: Dynamp is not loaded
+[10:08:35] [Server thread/INFO] (Minecraft) [STDOUT]: BlueMap is not loaded
+[10:08:35] [Server thread/INFO] (Minecraft) [STDOUT]: Squaremap is not loaded

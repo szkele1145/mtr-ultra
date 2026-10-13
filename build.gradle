@@ -4,7 +4,43 @@ plugins {
 	id 'fabric-loom' version '1.9.2'
 }
 
-version = project.mod_version
+// [multi-version] 构建目标 MC 版本由 -PbuildVersion 指定（默认 1.20.1）：
+//   gradlew build -PbuildVersion=1.19.4
+// 版本矩阵（fabric-api/ModMenu/编译目标 jar 的依赖坐标）见 docs/multi-version-plan.md
+def targetMcVersion = project.hasProperty("buildVersion") ? project.buildVersion : "1.20.1"
+
+def depMatrix = [
+	"1.20.1": [
+		fabricApi: "net.fabricmc.fabric-api:fabric-api:0.92.2+1.20.1",
+		modMenu : "com.terraformersmc:modmenu:7.2.2",
+		// 编译目标 jar（YMTR 优先，无 YMTR 的版本用官方 MTR）
+		targetJar: "libs/ymtr-fabric-1.20.1.jar",
+		runtimeExtra: "dev.architectury:architectury-fabric:9.2.14"
+	],
+	"1.19.4": [
+		fabricApi: "net.fabricmc.fabric-api:fabric-api:0.87.2+1.19.4",
+		modMenu : "com.terraformersmc:modmenu:6.3.1",
+		// 1.19.4 无 YMTR —— 用官方 MTR 3.2.2-hotfix-1
+		targetJar: "libs/mtr-fabric-1.19.4.jar",
+		runtimeExtra: null
+	],
+	"1.19.2": [
+		fabricApi: "net.fabricmc.fabric-api:fabric-api:0.77.0+1.19.2",
+		modMenu : "com.terraformersmc:modmenu:4.2.0-beta.2",
+		targetJar: "libs/ymtr-fabric-1.19.2.jar",
+		runtimeExtra: "dev.architectury:architectury-fabric:6.6.92"
+	]
+]
+def deps = depMatrix[targetMcVersion]
+if (deps == null) {
+	throw new GradleException("Unsupported buildVersion: ${targetMcVersion}. Supported: ${depMatrix.keySet()}")
+}
+
+// [multi-version] 1.19.4 及以下无 GuiGraphics（1.20 引入），ModMenu 配置屏
+// 仅 1.20.x 构建；1.19.x 版本不带配置屏（config/mtr-turbo.json 手编仍可用）
+boolean hasModMenuScreen = targetMcVersion.startsWith("1.20")
+
+version = "${project.mod_version}+${targetMcVersion}"
 group = project.maven_group
 
 base {
@@ -35,23 +71,24 @@ repositories {
 }
 
 dependencies {
-	minecraft "com.mojang:minecraft:1.20.1"
+	minecraft "com.mojang:minecraft:${targetMcVersion}"
 	mappings loom.layered() {
 		officialMojangMappings()
 	}
-	// YMTR 本地 jar：loom 会自动 remap 到 named（Mojang 映射）编译环境
-	modImplementation files("libs/ymtr-fabric-1.20.1.jar")
+	// 编译目标 jar：loom 会自动 remap 到 named（Mojang 映射）编译环境
+	modImplementation files(deps.targetJar)
 	modImplementation "net.fabricmc:fabric-loader:0.15.11"
-	modImplementation "net.fabricmc.fabric-api:fabric-api:0.92.2+1.20.1"
-	// ModMenu：配置屏入口点（编译期需要，运行时软依赖）
-	modCompileOnly "com.terraformersmc:modmenu:7.2.2"
+	modImplementation deps.fabricApi
+	// ModMenu：配置屏入口点（仅 1.20.x，1.19.x 无 GuiGraphics）
+	if (hasModMenuScreen) {
+		modCompileOnly deps.modMenu
+	}
 
-	// 运行时环境：YMTR 作为 mod 装入 mods 目录（modImplementation 同时已含编译依赖；
-	// 运行时需要发布态 jar —— 用 include 之外的 modRuntimeOnly 指向同 jar）
-	modRuntimeOnly files("libs/ymtr-fabric-1.20.1.jar")
-	// YMTR 运行时依赖 architectury-api（其 fabric.mod.json 只声明 fabric/*，实际主类引用
-	// dev.architectury 事件——冒烟测试实测 NoClassDefFoundError，补上运行时依赖）
-	modRuntimeOnly "dev.architectury:architectury-fabric:9.2.14"
+	// 运行时环境：目标 mod 作为 mod 装入 mods 目录
+	modRuntimeOnly files(deps.targetJar)
+	if (deps.runtimeExtra != null) {
+		modRuntimeOnly deps.runtimeExtra
+	}
 }
 
 // refmap 名与 mtr-ultra.mixins.json 里声明的 "mtr-ultra.refmap.json" 对齐
@@ -73,14 +110,37 @@ java {
 	targetCompatibility = JavaVersion.VERSION_17
 }
 
-// 源码布局在 fabric/src/main/java（沿用多目录习惯），追加到 loom 默认 sourceSet
+// 源码布局在 fabric/src/main/java（沿用多目录习惯），追加到 loom 默认 sourceSet。
+// 1.19.x 构建排除 ModMenu 配置屏（GuiGraphics 依赖）。
 sourceSets {
 	main {
 		java {
 			srcDir 'fabric/src/main/java'
+			if (!hasModMenuScreen) {
+				exclude 'mtrultra/fabric/MtrUltraModMenuApi.java'
+			}
 		}
 		resources {
 			srcDir 'fabric/src/main/resources'
+		}
+	}
+}
+
+// [multi-version] 1.19.x 的 fabric.mod.json 需移除 modmenu 入口点。
+// 纯文本正则在多形态缩进/逗号下脆弱（实测 MalformedJson: 尾逗号残留），
+// 改用 JsonSlurper/JsonBuilder 结构化处理——只重写这个小文件，安全可靠。
+processResources {
+	inputs.property "version", project.version
+	filesMatching("fabric.mod.json") {
+		expand "version": project.version
+	}
+	doLast {
+		if (!hasModMenuScreen) {
+			def fmlFile = file("${buildDir}/resources/main/fabric.mod.json")
+			def json = new groovy.json.JsonSlurper().parseText(fmlFile.getText('UTF-8'))
+			json.entrypoints.remove('modmenu')
+			json.remove('suggests')
+			fmlFile.setText(new groovy.json.JsonBuilder(json).toPrettyString(), 'UTF-8')
 		}
 	}
 }

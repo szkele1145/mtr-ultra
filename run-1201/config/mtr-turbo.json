@@ -1,0 +1,10 @@
+{
+  "enableDoorScanShortCircuit": false,
+  "enableCarRenderCulling": true,
+  "enableRailDedupNoAlloc": true,
+  "enableSimulationLod": true,
+  "simulationLodNearBlocks": 128,
+  "simulationLodMidBlocks": 256,
+  "enableScheduleThrottle": true,
+  "scheduleRebuildTicks": 20
+}
