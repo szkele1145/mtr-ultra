@@ -29,7 +29,7 @@ stays under half the minimum rail texture resolution.
 ## Measuring it yourself
 
 Run `/mtrturbo stats` (OP/cheats, 1.19.2+ Fabric / 1.20.1 both loaders) for live
-hit counters per optimization, with estimated savings and per-second rates. On any
+hit counters per optimization, with estimated savings and per-second rates. `/mtrturbo dump` (1.1.3+) additionally writes a standardized JSON snapshot (loader, MC version, all counters) to config/mtrturbo-stats.json for sharing benchmark data. On any
 version — including 1.18.2 where no command exists — set `statsLogIntervalSeconds`
 in the config (e.g. 300) to log a cumulative line every N seconds for hands-off
 benchmark collection.
