@@ -31,6 +31,15 @@
 | S | 双端描述符——Fabric `class_243` / Forge `net/minecraft/world/phys/Vec3`（1.18.2~1.20.1 逐字核对偏移 72） | ✅ javap 实证 |
 | T | stats 接入的 add() 在 Redirect handler 尾部（未启用缓存时直接 return 原始调用，不计数——语义正确：只统计缓存命中） | ✅ 语义正确 |
 
+## 双端一致性审计（2026-10-14，1.1.3 后）
+
+| 维度 | 方法 | 结果 |
+|---|---|---|
+| Stats 类 | report() 逐字节比对 + 差异定位 | ✅ 分叉仅在 dumpJson 的加载器 API（预期）；Forge 曾缺 minecraft 字段已补（1.1.4 候选） |
+| Config 类 | 10 字段逐一计数 + 钳制逻辑正则比对 + save() addProperty 计数 | ✅ 三项零漂移 |
+| mixins.json | 条目集合 Compare-Object | ✅ mixins 5+client 3 双端一致 |
+| 审计方法 | 哈希不同→定位差异范围→逐段确认，不做无脑同步 | ✅ 有意分叉保留，无意漂移归零 |
+
 ## 历史审查修复回顾
 
 - **0.2.2**：LOD `near < mid` 钳制（手编 JSON 可使分级永假）+ `period >= 1`（取模崩溃）
