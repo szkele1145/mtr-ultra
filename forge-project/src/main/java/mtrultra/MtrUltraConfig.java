@@ -25,6 +25,9 @@ public class MtrUltraConfig {
     // U3: 轨道去重表零分配
     public static boolean enableRailDedupNoAlloc = true;
 
+    // [0.3.0 / U6] Rail.getPosition 曲率缓存（0.25 格步长插值，视觉不可辨）
+    public static boolean enableRailPositionCache = true;
+
     // U4: 服务端模拟 LOD（近=每tick，中≤256格=每2tick，远=每4tick）
     public static boolean enableSimulationLod = true;
     public static int simulationLodNearBlocks = 128;
@@ -54,6 +57,7 @@ public class MtrUltraConfig {
                 enableDoorScanShortCircuit = get(obj, "enableDoorScanShortCircuit", enableDoorScanShortCircuit);
                 enableCarRenderCulling = get(obj, "enableCarRenderCulling", enableCarRenderCulling);
                 enableRailDedupNoAlloc = get(obj, "enableRailDedupNoAlloc", enableRailDedupNoAlloc);
+                enableRailPositionCache = get(obj, "enableRailPositionCache", enableRailPositionCache);
                 enableSimulationLod = get(obj, "enableSimulationLod", enableSimulationLod);
                 simulationLodNearBlocks = get(obj, "simulationLodNearBlocks", simulationLodNearBlocks);
                 simulationLodMidBlocks = get(obj, "simulationLodMidBlocks", simulationLodMidBlocks);
@@ -76,6 +80,7 @@ public class MtrUltraConfig {
             obj.addProperty("enableDoorScanShortCircuit", enableDoorScanShortCircuit);
             obj.addProperty("enableCarRenderCulling", enableCarRenderCulling);
             obj.addProperty("enableRailDedupNoAlloc", enableRailDedupNoAlloc);
+            obj.addProperty("enableRailPositionCache", enableRailPositionCache);
             obj.addProperty("enableSimulationLod", enableSimulationLod);
             obj.addProperty("simulationLodNearBlocks", simulationLodNearBlocks);
             obj.addProperty("simulationLodMidBlocks", simulationLodMidBlocks);
