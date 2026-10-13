@@ -61,24 +61,27 @@ MTR Turbo/
 - 骑乘者所在列车豁免渲染剔除（U2）；
 - **与 ANTE 共存**：检测到 ANTE 自动禁用 U5（IMixinConfigPlugin），U1-U4 全活跃（三方实测）；
 - 每项可单独关闭（`enableDoorScanShortCircuit` / `enableCarRenderCulling` / `enableRailDedupNoAlloc` / `enableSimulationLod` / `enableScheduleThrottle`）；
-- `/mtrturbo stats`（OP）实时查看各优化命中数与节省估算；Fabric 经 ModMenu / Forge 经 `/mtrturbo screen` 可视化调参。
+- `/mtrturbo stats`（OP）实时查看各优化命中数与节省估算；Fabric 经 ModMenu / Forge 经 `/mtrturbo screen` 可视化调参（1.20.x；1.18.2/1.19.x 请手编 `config/mtr-turbo.json`）。
 
 ## 构建
 
-需要 JDK 17 与 Gradle 8.11（wrapper 已配置腾讯镜像），本地代理已在 gradle.properties 预置。
+需要 JDK 17（路径配置为 `C:/jdk17`）与 Gradle 8.11（wrapper 已配置腾讯镜像）。
+多版本：`-PbuildVersion` 切换（1.18.2 / 1.19.2 / 1.19.4 / 1.20.1，默认 1.20.1）。
 
 ```
-gradlew build   # Fabric 产物 build/libs/MTR Turbo-<ver>.jar
-cd forge-project && gradlew build   # Forge 产物
+gradlew build                                # mtr-turbo-<ver>-1.20.1-fabric.jar
+gradlew build -PbuildVersion=1.19.4          # mtr-turbo-<ver>-1.19.4-fabric.jar
+cd forge-project && gradlew build            # mtr-turbo-<ver>-1.20.1-forge.jar
 ```
 
-依赖 jar（`libs/ymtr-fabric-1.20.1.jar`，Forge 构建用 `libs/ymtr-forge-1.20.1.jar`）
-从 [YMTR 发布页](https://modrinth.com/mod/ymtr) 下载同名版本放入。
+编译目标 jar 已在 `libs/` 随仓库提供（ymtr-fabric-1.20.1 / ymtr-fabric-1.19.2 /
+mtr-fabric-1.19.4 / mtr-fabric-1.18.2，以及 Forge 用的 ymtr-forge-1.20.1）。
 
 ## 测试
 
 ```
-gradlew runServer   # Fabric; Forge 在 forge-project/ 下同命令
+gradlew runServer                    # Fabric 1.20.1
+gradlew runServer -PbuildVersion=1.18.2   # 任意已支持版本
 ```
 
 冒烟记录：Fabric 8 轮 + Forge 3 轮 + 三方共存 4 轮迭代（ANTE 冲突发现→修复→验证）。
