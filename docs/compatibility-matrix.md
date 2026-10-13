@@ -32,6 +32,17 @@
 - **验证**：YMTR 3.6.4.2 + ANTE 1.1.1-continue.2 + MTR Turbo 0.2.5 三方同装，
   服务器 `Done (13.654s)` 后持续稳定。
 
+### 对 ANTE 续更版（MTR-ANTE Continued）的检测有效性（2026-10-14 常量池实证）
+
+| 检测路径 | 原版 ANTE | 续更版 ANTE（continue.2） |
+|---|---|---|
+| Fabric: modid `mtrsteamloco` | ✓ | ✓（续更版未改 modid） |
+| Fabric: 类路径探测 `cn.zbx1425.mtrsteamloco.Main` | ✓ | ✓（主类仍在，forgix 双前缀各一份） |
+| Forge: mods 目录扫描 `mtr-ante` 文件名特征 | ✓ | ✓（`MTR-ANTE-1.1.1-continue.2+*.jar` 命中） |
+| U5 让位必要性 | ✓（覆写 simulateTrains） | ✓（续更版保留同一覆写 mixin） |
+
+**结论：MTR Turbo 的 ANTE 检测对原版与续更版 ANTE 全部自动生效，无需任何配置。**
+
 ### 为什么只有 U5 冲突（mixin 机制分析）
 
 | MTR Turbo mixin | ANTE 对同类的操作 | 共存性 |
