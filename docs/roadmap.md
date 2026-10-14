@@ -20,11 +20,13 @@
   （≠YMTR 发布版）。轨道渲染是纯顶点提交无光照采样，此优化点不存在）
 - YMTR 上游更新跟踪（签名变化预警：mixin required 启动即失败，而非静默错乱）
 - 真实大存档 A/B 基准数据收集（用 1.0.5 的日志采集 + 1.1.3 的 dump 导出，等审核通过后社区协助）：
-  - **可行性调研（2026-10-14）**：YMTR 发布 jar 无程序化 addRail API（轨道经网络包创建），
-    无头服务器无法自动铺轨。三条路径中"预置含轨存档 + load(NBT)"可行但需真实客户端
-    先手工建一次存档（一次投入永久收益，适合白天用户操作）；
-  - **社区协作路径（首选）**：玩家有现成大存档——装 Turbo 跑 5 分钟
-    `/mtrturbo dump` 出标准化 JSON 直接分享，零额外成本获得真实数字。
+  - **可行性调研（2026-10-14）**：YMTR 发布 jar 无简单的程序化铺轨命令（轨道正常经网络包创建），
+    但 `RailwayData.addRail(Player, TransportMode, BlockPos×2, Rail, boolean)` 是 **public**——
+    一次性测试 mod 调它即可全自动预置含轨存档（Player 传 null 待试探；Rail 构造器
+    `(long, TransportMode, BlockPos, BlockPos, float)` 已在字节码确认）；
+  - **三条路径优先级**：①社区玩家现成存档 + dump（零成本，首选）②一次性 addRail 测试 mod
+    全自动建存档（中等投入）③手工创造模式铺轨（最后手段）；
+  - 拿到含轨存档后：开关对比 MSPT（`/spark tps` 或 forge/fabric 性能命令）+ stats/dump 计数即真实数字。
 
 > 预研纪律记录：getBrightness 与 rail.render 两候选点均被发布 jar 字节码验证否决
 > （第四次、第五次教训：源码树 ≠ 发布物，每个优化点实施前必须 javap 发布 jar）。
