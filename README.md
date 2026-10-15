@@ -5,16 +5,17 @@
 
 ## 状态
 
-**v1.1.1** — 23 轮真实服务器冒烟 + 三方共存实测（YMTR+ANTE+MTR Turbo）。
+**v1.1.4** — 39+ 轮真实服务器冒烟 + 三方共存实测（YMTR+ANTE+MTR Turbo）。
 **六大优化**（U1 扫描短路 / U2 车厢剔除 / U3 容器复用 / U4 模拟 LOD /
 U5 排班节流 / **U6 曲率缓存**）全部带独立开关与 stats 仪表
-（`/mtrturbo stats` 或周期日志 `statsLogIntervalSeconds`）、双端配置屏
-（Fabric: ModMenu / Forge: `/mtrturbo screen`，1.20.x）。
+（`/mtrturbo stats`、`/mtrturbo dump` JSON 导出、周期日志 `statsLogIntervalSeconds`）、
+双端配置屏（Fabric: ModMenu / Forge: `/mtrturbo screen`，1.20.x，8 项全覆盖）。
 **多版本矩阵**：MC 1.18.2 / 1.19.2 / 1.19.4 / 1.20.1 × Fabric，1.20.1 另有 Forge
-（mixin 目标签名跨四版本 javap 实证一致；U6 描述符 1.18.2~1.20.1 逐字相同）。
-**与 ANTE 共存**：检测到 ANTE 时 U5 自动让位（IMixinConfigPlugin），
-其余全活跃，启动日志明示。兼容面字节码实证：MTR 官方 3.2.2-hotfix-2
+（mixin 目标签名跨四版本 javap 实证一致；U6 描述符 1.18.2~1.20.1 逐字相同、曲线算法同构）。
+**与 ANTE 共存**：检测到 ANTE 时 U5 自动让位（IMixinConfigPlugin，对原版/续更版均生效——
+常量池实证），其余全活跃，启动日志明示。兼容面字节码实证：MTR 官方 3.2.2-hotfix-2
 与 YMTR 3.6.3/3.6.4.2 的全部挂钩签名一致（见 `docs/compatibility-matrix.md`）。
+**双端一致性**：Stats/Config/mixins.json 三维审计零漂移（20 个审查点+双端审计入档）。
 
 ## 架构
 
