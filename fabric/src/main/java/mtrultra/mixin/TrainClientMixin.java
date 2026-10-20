@@ -44,8 +44,10 @@ public abstract class TrainClientMixin {
 	 * TrainClient.simulateTrain 入口：刷新列车级剔除快照（每帧一次）。
 	 * RenderTrains 对每列车每帧调用一次 simulateTrain——
 	 * simulateCar 的剔除判定直接读这里的两个字段。
+	 * [修复 2026-10-21] require = 0：MTR 升级导致方法签名变化时
+	 * 注入仅失效（剔除退化为距离 0 = 不剔除），不崩客户端。
 	 */
-	@Inject(method = "simulateTrain", at = @At("HEAD"))
+	@Inject(method = "simulateTrain", at = @At("HEAD"), require = 0)
 	private void mtrultra$refreshSnapshot(Object world, float ticksElapsed, Object speedCallback, Object announcementCallback, Object lightRailAnnouncementCallback, CallbackInfo ci) {
 		final Minecraft client = Minecraft.getInstance();
 		final Player player = client.player;
@@ -57,8 +59,9 @@ public abstract class TrainClientMixin {
 	 * simulateCar HEAD 剔除：超距且非乘坐列车时取消整段（音频+渲染+连接件）。
 	 * 参数表（15 参）按 TrainClient.simulateCar 的实际签名排列；
 	 * 前三个坐标参数用于距离判定。
+	 * [修复 2026-10-21] require = 0：MTR 升级导致签名变化时仅失效（不剔除），不崩客户端。
 	 */
-	@Inject(method = "simulateCar", at = @At("HEAD"), cancellable = true)
+	@Inject(method = "simulateCar", at = @At("HEAD"), cancellable = true, require = 0)
 	private void mtrultra$cullDistantCar(
 			Object world, int ridingCar, float ticksElapsed,
 			double carX, double carY, double carZ, float carYaw, float carPitch,

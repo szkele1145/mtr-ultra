@@ -65,7 +65,8 @@ public abstract class TrainServerMixin {
 	@Unique
 	private int mtrultra$simInterval = 1;
 
-	@Inject(method = "simulateTrain", at = @At("HEAD"), cancellable = true)
+	// [修复 2026-10-21] require = 0：MTR 升级导致签名变化时 LOD 仅失效（不崩服务端）。
+	@Inject(method = "simulateTrain", at = @At("HEAD"), cancellable = true, require = 0)
 	private void mtrultra$simulationLod(
 			Level world, float ticksElapsed, Object depot, Object dataCache,
 			List<Map<UUID, Long>> trainPositions,

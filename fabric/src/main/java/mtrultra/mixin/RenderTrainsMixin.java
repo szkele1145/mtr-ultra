@@ -71,7 +71,13 @@ public abstract class RenderTrainsMixin {
 	 */
 	@org.spongepowered.asm.mixin.injection.Redirect(
 			method = "render(Lnet/minecraft/class_1297;FLnet/minecraft/class_4587;Lnet/minecraft/class_4597;)V",
-			at = @At(value = "NEW", target = "Ljava/util/HashMap;<init>()V")
+			at = @At(value = "NEW", target = "Ljava/util/HashMap;<init>()V"),
+			// [修复 2026-10-21] 原无 require，默认 require=1。
+			// @Redirect 不带 ordinal 时要求目标方法内**唯一**匹配；
+			// MTR 升级后只要多出一处 new HashMap()，注入就失败 ⇒ 直接崩客户端。
+			// 降级为 require=0：注入失败时保留原版每帧 new，行为退化但不崩。
+			// 与同工程 RailwayDataMixin 的「失败仅警告不崩溃」策略保持一致。
+			require = 0
 	)
 	private Object mtrultra$reuseRailMap() {
 		if (!MtrUltraConfig.enableRailDedupNoAlloc) {

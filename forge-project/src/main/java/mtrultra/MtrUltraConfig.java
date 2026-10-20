@@ -65,7 +65,11 @@ public class MtrUltraConfig {
                 scheduleRebuildTicks = get(obj, "scheduleRebuildTicks", scheduleRebuildTicks);
                 statsLogIntervalSeconds = get(obj, "statsLogIntervalSeconds", statsLogIntervalSeconds);
                 // [0.2.2] 一致性钳制: near < mid; period >= 1
+                // [修复 2026-10-21] 同 fabric 端：mid<=0 时原式产出 near=-1（非法），
+                // 平方比较后近档永不命中 ⇒ LOD 语义静默错乱。先钳 mid>=1，再钳 near>=0。
+                simulationLodMidBlocks = Math.max(1, simulationLodMidBlocks);
                 simulationLodNearBlocks = Math.min(simulationLodNearBlocks, simulationLodMidBlocks - 1);
+                simulationLodNearBlocks = Math.max(0, simulationLodNearBlocks);
                 scheduleRebuildTicks = Math.max(1, scheduleRebuildTicks);
             }
             save(); // 回写补全新字段

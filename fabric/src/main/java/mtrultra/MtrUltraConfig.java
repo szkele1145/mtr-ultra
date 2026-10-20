@@ -66,7 +66,14 @@ public class MtrUltraConfig {
                 // [0.2.2] 加载期一致性钳制：LOD 分级三目逻辑要求 near < mid；
                 // 手编 JSON 可能写出 near>=mid（此时分级永假=全部按 mid 档处理），
                 // scheduleRebuildTicks 至少为 1（0 会取模崩溃）
+                // [修复 2026-10-21] 原式 near = min(near, mid - 1) 在 mid<=0 时产出非法值：
+                //   mid=0 → near=-1；mid=1 → near=0。
+                // 随后 TrainServerMixin 用 near*near 比较，(-1)²=1、0²=0
+                // ⇒ 近档几乎永不命中，全部列车落到中/远档 ⇒ LOD 语义静默错乱。
+                // 现先把 mid 钳到 >=1，再钳 near 到 >=0。
+                simulationLodMidBlocks = Math.max(1, simulationLodMidBlocks);
                 simulationLodNearBlocks = Math.min(simulationLodNearBlocks, simulationLodMidBlocks - 1);
+                simulationLodNearBlocks = Math.max(0, simulationLodNearBlocks);
                 scheduleRebuildTicks = Math.max(1, scheduleRebuildTicks);
             }
             save(); // 回写补全新字段
