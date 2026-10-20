@@ -45,6 +45,18 @@
 - **0.2.2**：LOD `near < mid` 钳制（手编 JSON 可使分级永假）+ `period >= 1`（取模崩溃）
 - **0.2.3**：`ULTRA_INTERVAL` ThreadLocal 提前返回残留（上一列车 4 倍步长污染）+ 排班计数关闭期间重置
 - **ANTE continue.2**：滚转排序缓存在 messagepack/packet 反序列化路径不失效（返回上一条轨道数据）
+- **1.1.5**：排班节流判据 `% period == 1` 在 `period == 1` 时恒假 ⇒ **排班表永久冻结**
+  （clear 与 add 同时被跳过）。`scheduleRebuildTicks=1` 是可达配置
+  （`MtrUltraConfig` 只钳 `Math.max(1, ...)`），且用户的自然语义就是
+  「每 tick 重建 = 关闭节流」。改用 `(counter - 1) % period == 0`：
+  首 tick 即重建，`period=1` 恒 true，`period=N` 每 N tick 一次。
+  双端同步（fabric / forge-project 的 `RailwayDataMixin.java` 同一行）。
+- **1.1.5**：`org.gradle.java.home` 从 `Z:/jdk17` 改回 `C:/jdk17`
+  （`C:\jdk17` 是指向 `F:\vibe coding工程\jdk17` 的 junction，永久有效且纯 ASCII）。
+  `Z:` 由 `build.ps1` 临时 `subst`，脚本结束即删——标准构建流程下可用，
+  但 IDE / CI / 独立 `gradlew` 会失效。同批清掉死配置
+  `org.gradle.java.installations.paths=F:/tools/jdk17`（该目录不存在，
+  且工程无任何 toolchain 配置引用它）。
 
 ## 审查方法论
 

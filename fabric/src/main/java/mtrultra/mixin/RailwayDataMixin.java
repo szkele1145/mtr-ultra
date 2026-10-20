@@ -54,7 +54,13 @@ public abstract class RailwayDataMixin {
 		} else {
 			mtrultra$scheduleTickCounter++;
 			final int period = Math.max(1, MtrUltraConfig.scheduleRebuildTicks);
-			rebuild = mtrultra$scheduleTickCounter % period == 1;
+			// [1.1.5] 修复：原判据 `counter % period == 1` 在 period=1 时恒为 false
+			// （counter % 1 恒为 0），导致排班表被永久冻结——clear 与 add 同时被跳过。
+			// scheduleRebuildTicks=1 是可达配置（MtrUltraConfig 只钳 Math.max(1, ...)），
+			// 且用户的自然语义就是「每 tick 重建 = 关闭节流」。
+			// 改用 (counter-1) % period == 0：counter 从 1 起算，首 tick 即重建，
+			// period=1 时恒为 true（每 tick 重建），period=N 时每 N tick 重建一次。
+			rebuild = (mtrultra$scheduleTickCounter - 1) % period == 0;
 		}
 		ScheduleRebuildFlag.set(rebuild);
 	}
