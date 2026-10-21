@@ -8,3 +8,6 @@ run-192/
 yomis-mtr/
 run-182/
 libs/mtr41-fabric-1211.jar
+
+# 发布暂存目录
+release-*/
