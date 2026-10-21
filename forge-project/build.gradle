@@ -4,16 +4,45 @@ plugins {
 	id "dev.architectury.loom" version "1.9.424"
 }
 
+// [multi-version] 构建目标 MC 版本由 -PbuildVersion 指定（默认 1.20.1）：
+//   gradle build -PbuildVersion=1.19.4
+def targetMcVersion = project.hasProperty("buildVersion") ? project.buildVersion : "1.20.1"
+
+// [multi-version] 版本矩阵：与 fabric 端 build.gradle 的 depMatrix 平行
+def depMatrix = [
+	"1.20.1": [
+		forge   : "net.minecraftforge:forge:1.20.1-47.2.0",
+		// YMTR forge 本地 jar（其 mods.toml 声明 mandatory 依赖 architectury）
+		targetJar: "../libs/ymtr-forge-1.20.1.jar",
+		runtimeExtra: "dev.architectury:architectury-forge:9.2.14",
+	],
+	"1.19.4": [
+		forge   : "net.minecraftforge:forge:1.19.4-45.4.5",
+		// 1.19.4 无 YMTR —— 用官方 MTR 3.2.2-hotfix-1（包结构已用 JarList 核对：
+		// mtr/data/TrainClient、mtr/data/Train、mtr/render/RenderTrains 与 turbo
+		// 的 mixin 目标完全一致）
+		targetJar: "../libs/mtr-forge-1.19.4.jar",
+		runtimeExtra: null,
+	],
+]
+def deps = depMatrix[targetMcVersion]
+if (deps == null) {
+	throw new GradleException("Unsupported buildVersion: ${targetMcVersion}. Supported: ${depMatrix.keySet()}")
+}
+
+// [multi-version] 1.19.x 无 GuiGraphics（1.20 引入），配置屏仅 1.20.x 构建
+boolean hasConfigScreen = targetMcVersion.startsWith("1.20")
+
 version = project.mod_version
 group = project.maven_group
 
-// [命名规范] 产物文件名统一为: mtr-turbo-<mod版本>-1.20.1-forge.jar
+// [命名规范] 产物文件名统一为: mtr-turbo-<mod版本>-<mc版本>-forge.jar
 // loom 追加 version 会重复，直接钉死最终名：
 tasks.named('remapJar') {
-	archiveFileName = "mtr-turbo-${project.mod_version}-1.20.1-forge.jar"
+	archiveFileName = "mtr-turbo-${project.mod_version}-${targetMcVersion}-forge.jar"
 }
 tasks.named('jar') {
-	archiveFileName = "mtr-turbo-${project.mod_version}-1.20.1-forge-dev.jar"
+	archiveFileName = "mtr-turbo-${project.mod_version}-${targetMcVersion}-forge-dev.jar"
 }
 
 // 仓库声明保持在 loom 插件应用之后（原始布局）：
@@ -41,18 +70,20 @@ loom {
 }
 
 dependencies {
-	minecraft "com.mojang:minecraft:1.20.1"
+	minecraft "com.mojang:minecraft:${targetMcVersion}"
 	mappings loom.layered() {
 		officialMojangMappings()
 	}
-	forge "net.minecraftforge:forge:1.20.1-47.2.0"
+	forge deps.forge
 
-	// YMTR forge 本地 jar：loom 会自动 remap 到 named（Mojang 映射）编译环境
-	modImplementation files("../libs/ymtr-forge-1.20.1.jar")
-	// 运行时环境：YMTR 作为 mod 装入 mods 目录
-	modRuntimeOnly files("../libs/ymtr-forge-1.20.1.jar")
+	// 编译目标 jar：loom 会自动 remap 到 named（Mojang 映射）编译环境
+	modImplementation files(deps.targetJar)
+	// 运行时环境：目标 mod 作为 mod 装入 mods 目录
+	modRuntimeOnly files(deps.targetJar)
 	// YMTR forge 运行时依赖 architectury（其 mods.toml 声明 mandatory）
-	modRuntimeOnly "dev.architectury:architectury-forge:9.2.14"
+	if (deps.runtimeExtra != null) {
+		modRuntimeOnly deps.runtimeExtra
+	}
 }
 
 // mixin remap=false 且 target 均为自定义类名（mtr/*、java/*），不需要 refmap；
@@ -73,4 +104,16 @@ java {
 tasks.withType(JavaCompile).configureEach {
 	options.encoding = "UTF-8"
 	options.release = 17
+}
+
+// [multi-version] 1.19.x 排除配置屏（GuiGraphics 依赖，1.20 引入）。
+// 命令注册类保留（改用反射打开配置屏），1.19.x 运行时提示不可用。
+sourceSets {
+	main {
+		java {
+			if (!hasConfigScreen) {
+				exclude 'mtrultra/forge/MtrUltraForgeConfigScreen.java'
+			}
+		}
+	}
 }

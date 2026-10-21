@@ -49,15 +49,23 @@ import java.util.UUID;
 @Mixin(targets = "mtr.data.TrainServer", remap = false)
 public abstract class TrainServerMixin {
 
-	// ---- Train 继承链上的 protected 字段（TrainServer 视角可 shadow） ----
+	// ---- Train 继承链上的成员（TrainServer 视角可 shadow） ----
+	// [修复 2026-10-21] 可见性必须与目标完全一致：MTR 的 mtr.data.Train 中
+	//   isCurrentlyManual = protected
+	//   path              = public final List<PathData>
+	//   isPlayerRiding    = public final boolean (Player)
+	// mixin 运行时若把 @Shadow 声明的可见性低于目标，会抛
+	// "cannot reduce visibiliy of ... target method/field"（InvalidMixinException，
+	// 直接崩服/崩客户端）。AP 只在编译期给 warning，运行期才炸——必须写对。
+	// 可见性经 6 个目标 jar（MTR 3.2.2-hf1 / YMTR 3.6.x × fabric/forge）javap 逐一核对。
 	@Shadow
 	protected boolean isCurrentlyManual;
 
 	@Shadow
-	protected List<PathData> path;
+	public List<PathData> path;
 
 	@Shadow
-	protected abstract boolean isPlayerRiding(Player player);
+	public abstract boolean isPlayerRiding(Player player);
 
 	@Unique
 	private int mtrultra$simCounter = 0;

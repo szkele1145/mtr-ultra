@@ -31,6 +31,29 @@
 | S | 双端描述符——Fabric `class_243` / Forge `net/minecraft/world/phys/Vec3`（1.18.2~1.20.1 逐字核对偏移 72） | ✅ javap 实证 |
 | T | stats 接入的 add() 在 Redirect handler 尾部（未启用缓存时直接 return 原始调用，不计数——语义正确：只统计缓存命中） | ✅ 语义正确 |
 
+## 1.1.6 审查（U~X：相机时序 + @Shadow 可见性）
+
+| # | 审查点 | 结论 |
+|---|---|---|
+| U | **相机快照陈旧问题**（U2 剔除依据的 `cameraPos` 是否读到上一帧位置） | ✅ **不成立**。javap 实证：`GameRenderer.mainCamera` 是 `private final` 字段（永不重建），`Camera.position` 每帧由 `Camera.setup(...)` 刷新；字节码偏移显示 `Camera.setup()`（offset 449）严格早于 `LevelRenderer.renderLevel(camera.getPosition(), …)`（offset 524/528）。turbo 的快照在 `TrainClient.simulateTrain` HEAD 读取 ⇒ 拿到的是**当前帧**相机位置，无陈旧问题。**唯一冗余**是快照字段按 `TrainClient` 实例存储、却每列车重读一次（无害） |
+| V | **`@Shadow` 可见性降级 ⇒ 运行时崩溃**（`TrainServerMixin` 的 `path` / `isPlayerRiding`） | 🔧 **已修（1.1.6）**。MTR 的 `mtr.data.Train` 中 `path` = `public final List<PathData>`、`isPlayerRiding(Player)` = `public final boolean`；原代码声明为 `protected` / `protected abstract` ⇒ **降级**。Mixin 运行时校验 `"%s %s method %s in %s cannot reduce visibiliy of %s target method"`（`MixinPreProcessorStandard` 字节码常量池）⇒ 抛 `InvalidMixinException` **直接崩客户端/崩服务端**。注解处理器只在编译期给 `warning: Cannot find target for @Shadow`（静态分析限制：成员在父类 `Train` 上），**运行期才炸** ⇒ 「构建通过」≠「运行时安全」。已改为与目标逐字一致（`public` / `public abstract`），可见性经 **6 个目标 jar** 逐一 javap 核对 |
+| W | **1.19.4 Forge 目标签名兼容性**（新平台，此前从未构建） | ✅ 全部 10 个挂钩点签名与 1.20.1 完全一致：`Train.calculateCar` / `Train.scanDoors` / `Train.getRoutePosition` / `TrainServer.simulateTrain` / `TrainServer.lambda$simulateTrain$8(Map,long,long,TimeSegment)` / `RailwayData.simulateTrains()` / `RenderTrains.render(EntitySeat,float,PoseStack,MultiBufferSource)` / `RenderTrains.maxTrainRenderDistance`（`public static int`）/ `TrainClient.simulateTrain` / `TrainClient.simulateCar`（15 参）。`mtr.data.Train` 的 5 个成员（`doorTarget`/`doorValue`/`isCurrentlyManual`/`path`/`isPlayerRiding`）与 `RailwayData.schedulesForPlatform`（`private final Map<Long, List<ScheduleEntry>>`）在 6 个 jar 上逐项一致 |
+| X | **`forge-project/gradle.properties` 版本号独立于主工程** | 🔧 **已修（1.1.6）**。`forge-project` 是**独立 Gradle 项目**（有独立 `gradle.properties`），此前主工程 `mod_version` 升到 1.1.6 时 forge 端仍是 1.1.5 ⇒ 产物名与 mod 版本不一致，Modrinth/GitHub 会挂错版本号。已同步为 1.1.6 |
+
+### V 项的验证方法（可复用）
+
+```powershell
+# 1) 查目标 jar 中成员的真实可见性
+javap -p <jar> mtr.data.Train | Select-String 'isPlayerRiding|path'
+# 2) 查 mixin 运行时的可见性校验规则（常量池）
+javap -p -c org/spongepowered/asm/mixin/transformer/MixinPreProcessorStandard.class \
+  | Select-String 'cannot reduce visibiliy'
+```
+
+**结论**：`@Shadow` 声明的可见性**必须 ≥ 目标可见性**。AP 警告可忽略（父类成员），
+但可见性降级是**运行期致命**。发布前必须逐 jar javap 核对。
+
+
 ## 双端一致性审计（2026-10-14，1.1.3 后）
 
 | 维度 | 方法 | 结果 |
