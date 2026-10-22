@@ -125,7 +125,10 @@ public abstract class TrainServerMixin {
 	 */
 	@Redirect(
 			method = "lambda$simulateTrain$8",
-			at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z")
+			at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z"),
+			// [修复 2026-10-22] 补 require=0：MTR 升级改 lambda 序号/签名时
+			// 注入失败仅告警不崩（排班节流失效 = 每 tick 都写排班，行为退化但不崩）。
+			require = 0
 	)
 	private boolean mtrultra$skipScheduleWrite(Object list, Object entry) {
 		if (MtrUltraConfig.enableScheduleThrottle && !ScheduleRebuildFlag.isSet()) {

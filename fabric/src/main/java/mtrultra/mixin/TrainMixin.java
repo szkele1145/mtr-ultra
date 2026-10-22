@@ -33,7 +33,10 @@ public abstract class TrainMixin {
 
 	@ModifyExpressionValue(
 			method = "calculateCar",
-			at = @At(value = "INVOKE", target = "Lmtr/data/Train;scanDoors(Lnet/minecraft/class_1937;DDDFFDI)Z")
+			at = @At(value = "INVOKE", target = "Lmtr/data/Train;scanDoors(Lnet/minecraft/class_1937;DDDFFDI)Z"),
+			// [修复 2026-10-22] 补 require=0：MTR 升级改 scanDoors 签名时
+			// 注入失败仅告警不崩（短路失效 = 退回原版每 tick 扫门，行为退化但不崩）。
+			require = 0
 	)
 	private boolean mtrultra$shortCircuitScanDoors(boolean original) {
 		if (!MtrUltraConfig.enableDoorScanShortCircuit) {

@@ -42,6 +42,17 @@ import java.util.UUID;
 @Mixin(targets = "mtr.render.RenderTrains", remap = false)
 public abstract class RenderTrainsMixin {
 
+	// [修复 2026-10-22] 描述符第一参数必须是 Lmtr/entity/EntitySeat;
+	// 原先写的 Lnet/minecraft/class_1297;（MC Entity）——Mixin 的 MemberInfo.matches
+	// 对 desc 是 String.equals 精确比较（字节码证据），不做子类型兼容 ⇒
+	// EntitySeat 虽是 Entity 子类，desc 仍永不匹配 ⇒ @Inject/@Redirect
+	// 从 v0.1.0 起从未生效，且 @Inject 在 defaultRequire=1 下注入失败直接崩客户端。
+	// 实际签名（mtr-fabric-1.18.2 / mtr-fabric-1.19.4 / ymtr-fabric-1.19.2 /
+	// ymtr-fabric-1.20.1 四个目标 jar javap 验证一致）：
+	//   render(Lmtr/entity/EntitySeat;FLnet/minecraft/class_4587;Lnet/minecraft/class_4597;)V
+	private static final String RENDER_STATIC =
+			"render(Lmtr/entity/EntitySeat;FLnet/minecraft/class_4587;Lnet/minecraft/class_4597;)V";
+
 	@Unique
 	private static final ThreadLocal<HashMap<UUID, Object>> MTRULTRA$REUSED_MAP = new ThreadLocal<>();
 
@@ -51,8 +62,13 @@ public abstract class RenderTrainsMixin {
 	 * 轨道渲染去重表只在静态版内。
 	 */
 	@Inject(
-			method = "render(Lnet/minecraft/class_1297;FLnet/minecraft/class_4587;Lnet/minecraft/class_4597;)V",
-			at = @At("HEAD")
+			method = RENDER_STATIC,
+			at = @At("HEAD"),
+			// [修复 2026-10-22] 与 @Redirect 的降级策略一致：MTR 升级改签名时
+			// 注入失败仅告警不崩（require=0 下 U3 整体失效——若 @Redirect 成功
+			// 而 @Inject 失效会导致去重表跨帧残留，故两者必须同生共死，
+			// 见下方 @Redirect 的同款 require=0）。
+			require = 0
 	)
 	private void mtrultra$resetReusedMap(Object entity, float tickDelta, Object matrices, Object vertexConsumers, CallbackInfo ci) {
 		if (MtrUltraConfig.enableRailDedupNoAlloc) {
@@ -70,7 +86,7 @@ public abstract class RenderTrainsMixin {
 	 * clear 管理（同帧多次 render 清零也安全——去重表只在单次 render 内有效）。
 	 */
 	@org.spongepowered.asm.mixin.injection.Redirect(
-			method = "render(Lnet/minecraft/class_1297;FLnet/minecraft/class_4587;Lnet/minecraft/class_4597;)V",
+			method = RENDER_STATIC,
 			at = @At(value = "NEW", target = "Ljava/util/HashMap;<init>()V"),
 			// [修复 2026-10-21] 原无 require，默认 require=1。
 			// @Redirect 不带 ordinal 时要求目标方法内**唯一**匹配；

@@ -1,0 +1,198 @@
+
+> Configure project :
+Fabric Loom: 1.9.2
+
+> Task :compileJava
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\RailPositionCacheMixin.java:36: 警告: Mixin target mtr.data.Train is public and should be specified in value
+@Mixin(targets = "mtr.data.Train", remap = false)
+^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\RailwayDataMixin.java:39: 警告: Mixin target mtr.data.RailwayData is public and should be specified in value
+@Mixin(targets = "mtr.data.RailwayData", remap = false)
+^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\RenderTrainsAccessor.java:12: 警告: Mixin target mtr.render.RenderTrains is public and should be specified in value
+@Mixin(targets = "mtr.render.RenderTrains", remap = false)
+^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\RenderTrainsMixin.java:42: 警告: Mixin target mtr.render.RenderTrains is public and should be specified in value
+@Mixin(targets = "mtr.render.RenderTrains", remap = false)
+^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\TrainClientMixin.java:31: 警告: Mixin target mtr.data.TrainClient is public and should be specified in value
+@Mixin(targets = "mtr.data.TrainClient", remap = false)
+^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\TrainMixin.java:25: 警告: Mixin target mtr.data.Train is public and should be specified in value
+@Mixin(targets = "mtr.data.Train", remap = false)
+^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\TrainServerMixin.java:46: 警告: Mixin target mtr.data.TrainServer is public and should be specified in value
+@Mixin(targets = "mtr.data.TrainServer", remap = false)
+^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\TrainServerTickScaleMixin.java:21: 警告: Mixin target mtr.data.TrainServer is public and should be specified in value
+@Mixin(targets = "mtr.data.TrainServer", remap = false)
+^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\RenderTrainsMixin.java:64: 警告: Cannot find target method "render(Lmtr/entity/EntitySeat;FLnet/minecraft/class_4587;Lnet/minecraft/class_4597;)V" for @Inject.method="render(Lmtr/entity/EntitySeat;FLnet/minecraft/class_4587;Lnet/minecraft/class_4597;)V" in mtr.render.RenderTrains
+	@Inject(
+	^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\RenderTrainsMixin.java:88: 警告: Cannot find target method "render(Lmtr/entity/EntitySeat;FLnet/minecraft/class_4587;Lnet/minecraft/class_4597;)V" for @Redirect.method="render(Lmtr/entity/EntitySeat;FLnet/minecraft/class_4587;Lnet/minecraft/class_4597;)V" in mtr.render.RenderTrains
+	@org.spongepowered.asm.mixin.injection.Redirect(
+	^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\TrainClientMixin.java:34: 警告: Cannot find target for @Shadow method in mtr.data.TrainClient
+	@Shadow
+	^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\TrainServerMixin.java:58: 警告: Cannot find target for @Shadow field in mtr.data.TrainServer
+	@Shadow
+	^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\TrainServerMixin.java:61: 警告: Cannot find target for @Shadow field in mtr.data.TrainServer
+	@Shadow
+	^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\TrainServerMixin.java:64: 警告: Cannot find target for @Shadow method in mtr.data.TrainServer
+	@Shadow
+	^
+注: Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\RailwayDataMixin.java使用了未经检查或不安全的操作。
+注: 有关详细信息, 请使用 -Xlint:unchecked 重新编译。
+14 个警告
+
+> Task :processResources
+> Task :classes
+> Task :jar
+> Task :compileTestJava NO-SOURCE
+> Task :processIncludeJars UP-TO-DATE
+> Task :remapSourcesJar SKIPPED
+> Task :validateAccessWidener NO-SOURCE
+> Task :check
+> Task :remapJar
+> Task :assemble
+> Task :build
+[Incubating] Problems report is available at: file:///Z:/mtr-turbo/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 15s
+5 actionable tasks: 4 executed, 1 up-to-date
+
+> Configure project :
+Fabric Loom: 1.9.2
+
+> Task :compileJava
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\RailPositionCacheMixin.java:36: 警告: Mixin target mtr.data.Train is public and should be specified in value
+@Mixin(targets = "mtr.data.Train", remap = false)
+^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\RailwayDataMixin.java:39: 警告: Mixin target mtr.data.RailwayData is public and should be specified in value
+@Mixin(targets = "mtr.data.RailwayData", remap = false)
+^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\RenderTrainsAccessor.java:12: 警告: Mixin target mtr.render.RenderTrains is public and should be specified in value
+@Mixin(targets = "mtr.render.RenderTrains", remap = false)
+^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\RenderTrainsMixin.java:42: 警告: Mixin target mtr.render.RenderTrains is public and should be specified in value
+@Mixin(targets = "mtr.render.RenderTrains", remap = false)
+^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\TrainClientMixin.java:31: 警告: Mixin target mtr.data.TrainClient is public and should be specified in value
+@Mixin(targets = "mtr.data.TrainClient", remap = false)
+^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\TrainMixin.java:25: 警告: Mixin target mtr.data.Train is public and should be specified in value
+@Mixin(targets = "mtr.data.Train", remap = false)
+^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\TrainServerMixin.java:46: 警告: Mixin target mtr.data.TrainServer is public and should be specified in value
+@Mixin(targets = "mtr.data.TrainServer", remap = false)
+^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\TrainServerTickScaleMixin.java:21: 警告: Mixin target mtr.data.TrainServer is public and should be specified in value
+@Mixin(targets = "mtr.data.TrainServer", remap = false)
+^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\RenderTrainsMixin.java:64: 警告: Cannot find target method "render(Lmtr/entity/EntitySeat;FLnet/minecraft/class_4587;Lnet/minecraft/class_4597;)V" for @Inject.method="render(Lmtr/entity/EntitySeat;FLnet/minecraft/class_4587;Lnet/minecraft/class_4597;)V" in mtr.render.RenderTrains
+	@Inject(
+	^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\RenderTrainsMixin.java:88: 警告: Cannot find target method "render(Lmtr/entity/EntitySeat;FLnet/minecraft/class_4587;Lnet/minecraft/class_4597;)V" for @Redirect.method="render(Lmtr/entity/EntitySeat;FLnet/minecraft/class_4587;Lnet/minecraft/class_4597;)V" in mtr.render.RenderTrains
+	@org.spongepowered.asm.mixin.injection.Redirect(
+	^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\TrainClientMixin.java:34: 警告: Cannot find target for @Shadow method in mtr.data.TrainClient
+	@Shadow
+	^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\TrainServerMixin.java:58: 警告: Cannot find target for @Shadow field in mtr.data.TrainServer
+	@Shadow
+	^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\TrainServerMixin.java:61: 警告: Cannot find target for @Shadow field in mtr.data.TrainServer
+	@Shadow
+	^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\TrainServerMixin.java:64: 警告: Cannot find target for @Shadow method in mtr.data.TrainServer
+	@Shadow
+	^
+注: Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\RailwayDataMixin.java使用了未经检查或不安全的操作。
+注: 有关详细信息, 请使用 -Xlint:unchecked 重新编译。
+14 个警告
+
+> Task :processResources
+> Task :classes
+> Task :jar
+> Task :compileTestJava NO-SOURCE
+> Task :processIncludeJars UP-TO-DATE
+> Task :remapSourcesJar SKIPPED
+> Task :validateAccessWidener NO-SOURCE
+> Task :check
+> Task :remapJar
+> Task :assemble
+> Task :build
+[Incubating] Problems report is available at: file:///Z:/mtr-turbo/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 12s
+5 actionable tasks: 4 executed, 1 up-to-date
+
+> Configure project :
+Fabric Loom: 1.9.2
+
+> Task :compileJava
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\RailPositionCacheMixin.java:36: 警告: Mixin target mtr.data.Train is public and should be specified in value
+@Mixin(targets = "mtr.data.Train", remap = false)
+^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\RailwayDataMixin.java:39: 警告: Mixin target mtr.data.RailwayData is public and should be specified in value
+@Mixin(targets = "mtr.data.RailwayData", remap = false)
+^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\RenderTrainsAccessor.java:12: 警告: Mixin target mtr.render.RenderTrains is public and should be specified in value
+@Mixin(targets = "mtr.render.RenderTrains", remap = false)
+^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\RenderTrainsMixin.java:42: 警告: Mixin target mtr.render.RenderTrains is public and should be specified in value
+@Mixin(targets = "mtr.render.RenderTrains", remap = false)
+^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\TrainClientMixin.java:31: 警告: Mixin target mtr.data.TrainClient is public and should be specified in value
+@Mixin(targets = "mtr.data.TrainClient", remap = false)
+^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\TrainMixin.java:25: 警告: Mixin target mtr.data.Train is public and should be specified in value
+@Mixin(targets = "mtr.data.Train", remap = false)
+^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\TrainServerMixin.java:46: 警告: Mixin target mtr.data.TrainServer is public and should be specified in value
+@Mixin(targets = "mtr.data.TrainServer", remap = false)
+^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\TrainServerTickScaleMixin.java:21: 警告: Mixin target mtr.data.TrainServer is public and should be specified in value
+@Mixin(targets = "mtr.data.TrainServer", remap = false)
+^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\RenderTrainsMixin.java:64: 警告: Cannot find target method "render(Lmtr/entity/EntitySeat;FLnet/minecraft/class_4587;Lnet/minecraft/class_4597;)V" for @Inject.method="render(Lmtr/entity/EntitySeat;FLnet/minecraft/class_4587;Lnet/minecraft/class_4597;)V" in mtr.render.RenderTrains
+	@Inject(
+	^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\RenderTrainsMixin.java:88: 警告: Cannot find target method "render(Lmtr/entity/EntitySeat;FLnet/minecraft/class_4587;Lnet/minecraft/class_4597;)V" for @Redirect.method="render(Lmtr/entity/EntitySeat;FLnet/minecraft/class_4587;Lnet/minecraft/class_4597;)V" in mtr.render.RenderTrains
+	@org.spongepowered.asm.mixin.injection.Redirect(
+	^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\TrainClientMixin.java:34: 警告: Cannot find target for @Shadow method in mtr.data.TrainClient
+	@Shadow
+	^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\TrainServerMixin.java:58: 警告: Cannot find target for @Shadow field in mtr.data.TrainServer
+	@Shadow
+	^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\TrainServerMixin.java:61: 警告: Cannot find target for @Shadow field in mtr.data.TrainServer
+	@Shadow
+	^
+Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\TrainServerMixin.java:64: 警告: Cannot find target for @Shadow method in mtr.data.TrainServer
+	@Shadow
+	^
+注: Z:\mtr-turbo\fabric\src\main\java\mtrultra\mixin\RailwayDataMixin.java使用了未经检查或不安全的操作。
+注: 有关详细信息, 请使用 -Xlint:unchecked 重新编译。
+14 个警告
+
+> Task :processResources
+> Task :classes
+> Task :jar
+> Task :compileTestJava NO-SOURCE
+> Task :processIncludeJars UP-TO-DATE
+> Task :remapSourcesJar SKIPPED
+> Task :validateAccessWidener NO-SOURCE
+> Task :check
+> Task :remapJar
+> Task :assemble
+> Task :build
+[Incubating] Problems report is available at: file:///Z:/mtr-turbo/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 10s
+5 actionable tasks: 4 executed, 1 up-to-date

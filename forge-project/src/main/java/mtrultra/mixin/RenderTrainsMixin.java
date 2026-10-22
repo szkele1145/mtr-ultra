@@ -48,7 +48,10 @@ public abstract class RenderTrainsMixin {
 	 */
 	@Inject(
 			method = RENDER_STATIC,
-			at = @At("HEAD")
+			at = @At("HEAD"),
+			// [修复 2026-10-22] 与 fabric 版同步加 require=0：两者必须同生共死
+			// （若 @Redirect 成功而 @Inject 失效会导致去重表跨帧残留）。
+			require = 0
 	)
 	private void mtrultra$resetReusedMap(Object entity, float tickDelta, Object matrices, Object vertexConsumers, CallbackInfo ci) {
 		if (MtrUltraConfig.enableRailDedupNoAlloc) {
@@ -67,7 +70,10 @@ public abstract class RenderTrainsMixin {
 	 */
 	@org.spongepowered.asm.mixin.injection.Redirect(
 			method = RENDER_STATIC,
-			at = @At(value = "NEW", target = "Ljava/util/HashMap;<init>()V")
+			at = @At(value = "NEW", target = "Ljava/util/HashMap;<init>()V"),
+			// [修复 2026-10-22] 与 fabric 版同步加 require=0（@Redirect 不带
+			// ordinal 时要求方法内唯一匹配；MTR 升级后签名变化会失败 ⇒ 崩客户端）。
+			require = 0
 	)
 	private Object mtrultra$reuseRailMap() {
 		if (!MtrUltraConfig.enableRailDedupNoAlloc) {

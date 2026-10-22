@@ -31,7 +31,10 @@ public abstract class TrainServerTickScaleMixin {
 	@ModifyArg(
 			method = "simulateTrain",
 			at = @At(value = "INVOKE", target = "Lmtr/data/Train;simulateTrain(Lnet/minecraft/class_1937;FLmtr/data/Depot;)V"),
-			index = 1
+			index = 1,
+			// [修复 2026-10-22] 补 require=0：MTR 升级改父类调用签名时
+			// 注入失败仅告警不崩（步长放大失效 = LOD 退化为每 tick 模拟，行为退化但不崩）。
+			require = 0
 	)
 	private float mtrultra$scaleTicksElapsed(float original) {
 		final int interval = ULTRA_INTERVAL.get();

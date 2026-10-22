@@ -43,7 +43,10 @@ public abstract class TrainMixin {
 
 	@Redirect(
 			method = "calculateCar",
-			at = @At(value = "INVOKE", target = "Lmtr/data/Train;scanDoors(Lnet/minecraft/world/level/Level;DDDFFDI)Z")
+			at = @At(value = "INVOKE", target = "Lmtr/data/Train;scanDoors(Lnet/minecraft/world/level/Level;DDDFFDI)Z"),
+			// [修复 2026-10-22] 补 require=0：MTR 升级改 scanDoors 签名时
+			// 注入失败仅告警不崩（短路失效 = 退回原版每 tick 扫门，行为退化但不崩）。
+			require = 0
 	)
 	private boolean mtrultra$shortCircuitScanDoors(TrainMixin instance, Level world, double x, double y, double z, float checkWidth, float checkHeight, double yaw, int blocksToCheck) {
 		if (!MtrUltraConfig.enableDoorScanShortCircuit) {

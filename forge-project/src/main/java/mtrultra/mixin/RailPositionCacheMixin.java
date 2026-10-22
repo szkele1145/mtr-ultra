@@ -45,7 +45,10 @@ public abstract class RailPositionCacheMixin {
 
 	@Redirect(
 			method = "getRoutePosition",
-			at = @At(value = "INVOKE", target = "Lmtr/data/Rail;getPosition(D)Lnet/minecraft/world/phys/Vec3;")
+			at = @At(value = "INVOKE", target = "Lmtr/data/Rail;getPosition(D)Lnet/minecraft/world/phys/Vec3;"),
+			// [修复 2026-10-22] 补 require=0：MTR 升级改 Rail.getPosition 签名时
+			// 注入失败仅告警不崩（缓存失效 = 退回原版逐点计算，行为退化但不崩）。
+			require = 0
 	)
 	private Vec3 mtrturbo$cachedGetPosition(Object rail, double progress) {
 		if (!MtrUltraConfig.enableRailPositionCache) {
