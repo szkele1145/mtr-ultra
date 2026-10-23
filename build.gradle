@@ -168,3 +168,83 @@ tasks.withType(JavaCompile).configureEach {
 	options.encoding = "UTF-8"
 	options.release = 17
 }
+
+// ───────────────────────────────────────────────────────────────────────────
+// mixin 引用审计（字节码级）
+//
+// 背景：turbo 全部 mixin 都是 remap=false + 手写符号，且注入器都带 require=0
+// ⇒ 描述符/方法名写错**不会崩**，而是静默失效（用户以为装了优化，实际没生效）。
+// RenderTrainsMixin 从 v0.1.0 起就是这么失效的（第一个参数误写为 MC Entity）。
+//
+// 本任务把每个注入器的 method= 与 @At(target=...) 里的引用，
+// 逐个拿到真实目标 jar 里验证存在性。
+// ───────────────────────────────────────────────────────────────────────────
+def registerMixinAudit = { String taskName, String srcDir, List<String> jarNames ->
+	tasks.register(taskName, JavaExec) {
+		group = 'verification'
+		description = "审计 ${srcDir} 的 mixin 引用是否在目标 jar 中真实存在（防静默失效）"
+
+		def srcFile = file('tools/AuditTurboMixinRefs.java')
+		def outDir = layout.buildDirectory.dir("verify-mixin-${taskName}").get().asFile
+		def srcRoot = file(srcDir)
+
+		inputs.file(srcFile)
+		inputs.dir(srcRoot)
+		outputs.dir(outDir)
+
+		doFirst {
+			outDir.mkdirs()
+
+			def asmCfg = configurations.detachedConfiguration(
+					dependencies.create('org.ow2.asm:asm:9.7.1'),
+					dependencies.create('org.ow2.asm:asm-tree:9.7.1')
+			)
+			asmCfg.transitive = false
+			def asmCp = asmCfg.files.collect { it.absolutePath }.join(File.pathSeparator)
+
+			def compiler = javax.tools.ToolProvider.getSystemJavaCompiler()
+			if (compiler == null) {
+				throw new GradleException('需要 JDK（不是 JRE）来编译 AuditTurboMixinRefs.java')
+			}
+			def fm = compiler.getStandardFileManager(null, null, null)
+			def units = fm.getJavaFileObjects(srcFile)
+			def opts = ['-d', outDir.absolutePath, '-cp', asmCp, '-encoding', 'UTF-8', '-nowarn'] as List
+			def compilerTask = compiler.getTask(null, fm, null, opts, null, units)
+			def ok = compilerTask.call()
+			fm.close()
+			if (!ok) throw new GradleException('AuditTurboMixinRefs.java 编译失败')
+
+			def asmCfg2 = configurations.detachedConfiguration(
+					dependencies.create('org.ow2.asm:asm:9.7.1'),
+					dependencies.create('org.ow2.asm:asm-tree:9.7.1')
+			)
+			asmCfg2.transitive = false
+			classpath = files(outDir) + asmCfg2
+
+			def argsList = [srcRoot.absolutePath]
+			jarNames.each { n ->
+				def j = file("libs/${n}")
+				if (!j.exists()) throw new GradleException("缺少目标 jar: ${j}")
+				argsList << j.absolutePath
+			}
+			args = argsList
+		}
+
+		mainClass = 'AuditTurboMixinRefs'
+	}
+}
+
+registerMixinAudit('auditMixinRefsFabric', 'fabric/src/main/java', [
+		'ymtr-fabric-1.20.1.jar', 'mtr-fabric-1.19.4.jar',
+		'ymtr-fabric-1.19.2.jar', 'mtr-fabric-1.18.2.jar'
+])
+
+registerMixinAudit('auditMixinRefsForge', 'forge-project/src/main/java', [
+		'ymtr-forge-1.20.1.jar', 'mtr-forge-1.19.4.jar'
+])
+
+tasks.register('auditMixinRefs') {
+	group = 'verification'
+	description = 'fabric + forge 两侧 mixin 引用审计的聚合入口'
+	dependsOn 'auditMixinRefsFabric', 'auditMixinRefsForge'
+}
