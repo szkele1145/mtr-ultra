@@ -102,14 +102,109 @@ public class AuditTurboMixinRefs {
                 || owner.startsWith("org/msgpack/") || owner.startsWith("it/unimi/");
     }
 
+    /**
+     * 读 refmap（AP 生成的 Mojmap→intermediary 映射表），建立
+     * 「Mojmap 描述符 → intermediary 描述符」的转换。
+     *
+     * <p>★ 为什么需要（1.1.8 新增）：
+     * turbo 过去全部 mixin 都用 {@code remap=false} + 手写 intermediary 符号，
+     * 审计器可以直接拿描述符去目标 jar 里比对。但 1.1.8 起
+     * {@code RenderTrainsMixin} 改用 {@code remap=true} + <b>Mojmap</b> 描述符
+     * （因为 handler 参数必须写精确类型，见该类注释），
+     * 运行时由 refmap 还原成 intermediary。
+     * <br>⇒ 审计器若不认 refmap，就会把「运行时其实能匹配」的引用
+     * 误判为「无方法」⇒ 假阳性。
+     * <br>⇒ 本转换让审计保持严格：转换后仍找不到 ⇒ 依然报错。
+     */
+    static Map<String, String> loadRefmap(Path refmap) {
+        Map<String, String> map = new HashMap<>();
+        if (refmap == null || !Files.exists(refmap)) return map;
+        try {
+            String text = new String(Files.readAllBytes(refmap), StandardCharsets.UTF_8);
+            // refmap 形如（每行一条）：
+            //   "render(<Mojmap desc>)V": "Lmtr/render/RenderTrains;render(<intermediary desc>)V"
+            // 用**逐行 + 简单引号切分**解析（不用正则：Mojmap 描述符里含
+            // 大量特殊字符，正则转义极易出错——本次就踩过）。
+            for (String rawLine : text.split("\r?\n")) {
+                String line = rawLine.trim();
+                if (!line.startsWith("\"")) continue;
+                int keyEnd = line.indexOf('"', 1);
+                if (keyEnd < 0) continue;
+                String named = line.substring(1, keyEnd);
+                int colon = line.indexOf(':', keyEnd);
+                if (colon < 0) continue;
+                int vStart = line.indexOf('"', colon + 1);
+                if (vStart < 0) continue;
+                int vEnd = line.indexOf('"', vStart + 1);
+                if (vEnd < 0) continue;
+                String value = line.substring(vStart + 1, vEnd);
+                if (!value.startsWith("L")) continue;
+                int semi = value.indexOf(';');
+                if (semi < 0) continue;
+                String owner = value.substring(1, semi);
+                String member = value.substring(semi + 1);
+                // ★ member 形如 "render(<intermediary desc>)V" —— name 与 desc **直接相连**，
+                //   中间没有点（refmap 的值格式是 "Lowner;name(desc)ret"）。
+                int mParen = member.indexOf('(');
+                if (mParen < 0) continue;
+                String mName = member.substring(0, mParen);
+                String mDesc = member.substring(mParen);
+                int paren = named.indexOf('(');
+                if (paren < 0) continue;
+                String nName = named.substring(0, paren);
+                String nDesc = named.substring(paren);
+                if (!mName.equals(nName)) continue;
+                map.put(owner + "." + nName + nDesc, owner + "." + mName + mDesc);
+            }
+        } catch (IOException e) {
+            System.out.println("!! 读 refmap 失败: " + e.getMessage());
+        }
+        if (!map.isEmpty()) {
+            System.out.println("refmap 条目: " + map.size() + "  (" + refmap.getFileName() + ")");
+        }
+        return map;
+    }
+
+    /**
+     * 把「Mojmap 描述符」按 refmap 转换成「intermediary 描述符」。
+     * <br>转换后的形式若在目标 jar 里能命中 ⇒ 运行时经 refmap 也能命中。
+     * <br>返回 null 表示 refmap 里没有这条映射（调用方需回退到原描述符再判）。
+     */
+    static String mapDesc(Map<String, String> refmap, String owner, String name, String desc) {
+        if (refmap == null || refmap.isEmpty()) return null;
+        String key = owner + "." + name + desc;
+        String mapped = refmap.get(key);
+        if (mapped == null) return null;
+        // mapped 形如 "mtr/render/RenderTrains.render(<intermediary desc>)V"
+        // ★ owner 里不含 '.'，故用**最后一个** '.' 之前部分作 owner；
+        //   描述符取 '(' 之后的部分（★ 不含方法名——hasMethod 只收描述符）。
+        int dot = mapped.lastIndexOf('.');
+        if (dot < 0) return null;
+        String mOwner = mapped.substring(0, dot);
+        String member = mapped.substring(dot + 1);
+        int paren = member.indexOf('(');
+        if (paren < 0) return null;
+        String mDesc = member.substring(paren);
+        if (!mOwner.equals(owner)) return null;
+        return mDesc;
+    }
+
     public static void main(String[] args) throws Exception {
         if (args.length < 2) {
-            System.err.println("用法: AuditTurboMixinRefs <源码目录> <jar1> [jar2 ...]");
+            System.err.println("用法: AuditTurboMixinRefs <源码目录> <jar1> [jar2 ...] [--refmap <refmap.json>]");
             System.exit(2);
         }
         Path srcRoot = Paths.get(args[0]);
         List<Path> jars = new ArrayList<>();
-        for (int i = 1; i < args.length; i++) jars.add(Paths.get(args[i]));
+        Path refmapFile = null;
+        for (int i = 1; i < args.length; i++) {
+            if ("--refmap".equals(args[i]) && i + 1 < args.length) {
+                refmapFile = Paths.get(args[++i]);
+            } else {
+                jars.add(Paths.get(args[i]));
+            }
+        }
+        final Map<String, String> refmap = loadRefmap(refmapFile);
 
         System.out.println("源码目录: " + srcRoot);
         List<String> jarLabels = new ArrayList<>();
@@ -185,13 +280,27 @@ public class AuditTurboMixinRefs {
                 }
                 checked++;
                 boolean allOk = true;
+                boolean refmapped = false;
                 StringBuilder miss = new StringBuilder();
                 for (Map.Entry<String, Index> e : idx.entrySet()) {
                     Index ix = e.getValue();
                     if (!ix.hasClass(owner)) { miss.append(" [").append(e.getKey()).append(" 无类 ").append(owner).append("]"); allOk = false; }
-                    else if (!ix.hasMethod(owner, name, desc)) { miss.append(" [").append(e.getKey()).append(" 无方法]"); allOk = false; }
+                    else if (!ix.hasMethod(owner, name, desc)) {
+                        // ★ 先试 refmap 转换（Mojmap → intermediary），转换后能命中即算通过
+                        String mapped = mapDesc(refmap, owner, name, desc);
+                        if (mapped != null && ix.hasMethod(owner, name, mapped)) {
+                            // 经 refmap 命中 ⇒ 运行时可匹配
+                            refmapped = true;
+                        } else {
+                            miss.append(" [").append(e.getKey()).append(" 无方法]"); allOk = false;
+                        }
+                    }
                 }
-                if (allOk) { ok++; System.out.printf("   ok   %s.%s%s%n", owner.replace('/', '.'), name, desc); }
+                if (allOk) {
+                    ok++;
+                    System.out.printf("   ok   %s.%s%s%s%n", owner.replace('/', '.'), name, desc,
+                            refmapped ? "  （经 refmap 转换后命中）" : "");
+                }
                 else {
                     bad++;
                     String msg = String.format("%s  %s.%s%s  →%s", fname, owner.replace('/', '.'), name, desc, miss);
@@ -205,12 +314,21 @@ public class AuditTurboMixinRefs {
                 String desc = parts.length > 1 ? parts[1] : null;
                 checked++;
                 boolean allOk = true;
+                boolean refmapped = false;
                 StringBuilder miss = new StringBuilder();
                 for (Map.Entry<String, Index> e : idx.entrySet()) {
                     Index ix = e.getValue();
                     boolean found;
                     if (desc != null) {
                         found = targetOwner != null && ix.hasMethod(targetOwner, name, desc);
+                        // ★ 同上：remap=true 的成员用 Mojmap 描述符，需经 refmap 转换
+                        if (!found && targetOwner != null) {
+                            String mapped = mapDesc(refmap, targetOwner, name, desc);
+                            if (mapped != null && ix.hasMethod(targetOwner, name, mapped)) {
+                                found = true;
+                                refmapped = true;
+                            }
+                        }
                     } else if (targetOwner != null) {
                         found = ix.hasMethodByName(targetOwner, name);
                     } else {
@@ -222,7 +340,11 @@ public class AuditTurboMixinRefs {
                     }
                     if (!found) { miss.append(" [").append(e.getKey()).append(" 未找到]"); allOk = false; }
                 }
-                if (allOk) { ok++; System.out.printf("   ok   method=%s%s%n", name, desc == null ? "" : desc); }
+                if (allOk) {
+                    ok++;
+                    System.out.printf("   ok   method=%s%s%s%n", name, desc == null ? "" : desc,
+                            refmapped ? "  （经 refmap 转换后命中）" : "");
+                }
                 else {
                     bad++;
                     String msg = String.format("%s  method=%s%s  →%s", fname, name, desc == null ? "" : desc, miss);

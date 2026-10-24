@@ -227,10 +227,19 @@ def registerMixinAudit = { String taskName, String srcDir, List<String> jarNames
 				if (!j.exists()) throw new GradleException("缺少目标 jar: ${j}")
 				argsList << j.absolutePath
 			}
+			// ★ [1.1.8] 传 refmap：remap=true 的成员用 Mojmap 描述符，
+			//   审计器需按 refmap 转换后再比对，否则假阳性。
+			def refmapFile = file("${buildDir}/classes/java/main/mtr-ultra.refmap.json")
+			if (refmapFile.exists()) {
+				argsList << "--refmap" << refmapFile.absolutePath
+			}
 			args = argsList
 		}
 
 		mainClass = 'AuditTurboMixinRefs'
+		// ★ 中文路径：Java 默认按 GBK 解码命令行参数 ⇒ 路径乱码 ⇒ 读不到 jar/refmap。
+		//   显式指定 UTF-8（jvmArgs 必须在 doFirst 之前设置，args 变化不影响 jvmArgs）。
+		jvmArgs '-Dfile.encoding=UTF-8', '-Dsun.jnu.encoding=UTF-8'
 	}
 }
 
