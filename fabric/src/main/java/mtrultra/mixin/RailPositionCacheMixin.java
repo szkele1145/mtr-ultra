@@ -1,5 +1,6 @@
 package mtrultra.mixin;
 
+import mtr.data.Rail;
 import mtrultra.MtrUltraConfig;
 import mtrultra.MtrUltraStats;
 import net.minecraft.world.phys.Vec3;
@@ -43,6 +44,15 @@ public abstract class RailPositionCacheMixin {
 	private static final ThreadLocal<Map<Object, Vec3[]>> MTRTURBO$POS_CACHE =
 			ThreadLocal.withInitial(() -> Collections.synchronizedMap(new WeakHashMap<>()));
 
+	/**
+	 * ★ [1.1.8 真机修复] handler 首参此前是 {@code Object rail}，
+	 * 而 @Redirect 的目标 {@code Rail.getPosition(D)Lnet/minecraft/class_243;} 要求
+	 * 首参精确为 {@code mtr.data.Rail} ⇒
+	 * {@code InvalidInjectionException: @Redirect handler method ... has an invalid signature.
+	 * Found unexpected argument type java.lang.Object at index 0, expected mtr.data.Rail}
+	 * ⇒ 资源重载失败 → MC 移除全部资源包并反复重试。
+	 * 修法：首参改精确类型 {@code Rail}（编译期 loom 的 modImplementation 提供该类）。
+	 */
 	@Redirect(
 			method = "getRoutePosition",
 			at = @At(value = "INVOKE", target = "Lmtr/data/Rail;getPosition(D)Lnet/minecraft/class_243;"),
@@ -50,14 +60,14 @@ public abstract class RailPositionCacheMixin {
 			// 注入失败仅告警不崩（缓存失效 = 退回原版逐点计算，行为退化但不崩）。
 			require = 0
 	)
-	private Vec3 mtrturbo$cachedGetPosition(Object rail, double progress) {
+	private Vec3 mtrturbo$cachedGetPosition(Rail rail, double progress) {
 		if (!MtrUltraConfig.enableRailPositionCache) {
-			return ((mtr.data.Rail) rail).getPosition(progress);
+			return rail.getPosition(progress);
 		}
 		final Map<Object, Vec3[]> cache = MTRTURBO$POS_CACHE.get();
 		Vec3[] samples = cache.get(rail);
 		if (samples == null) {
-			samples = mtrturbo$buildSamples((mtr.data.Rail) rail);
+			samples = mtrturbo$buildSamples(rail);
 			cache.put(rail, samples);
 		}
 		// progress 越界钳制（原方法 progress>=0 由调用方 Math.max 保证，上界防御）

@@ -1,9 +1,11 @@
 package mtrultra.mixin;
 
+import mtr.data.TrainClient;
 import mtrultra.MtrUltraConfig;
 import mtrultra.MtrUltraStats;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -56,11 +58,25 @@ public abstract class TrainClientMixin {
 	 * TrainClient.simulateTrain 入口：刷新列车级剔除快照（每帧一次）。
 	 * RenderTrains 对每列车每帧调用一次 simulateTrain——
 	 * simulateCar 的剔除判定直接读这里的两个字段。
-	 * [修复 2026-10-21] require = 0：MTR 升级导致方法签名变化时
-	 * 注入仅失效（剔除退化为距离 0 = 不剔除），不崩客户端。
+	 *
+	 * <p><b>★ [1.1.8 真机修复]</b> 此前 handler 声明为
+	 * {@code (Object, float, Object, Object, Object, CallbackInfo)}（6 参、参数全是 Object），
+	 * 而目标 {@code TrainClient.simulateTrain} 的真实签名是 <b>5 参</b>：
+	 * {@code (Level, float, SpeedCallback, AnnouncementCallback, AnnouncementCallback)}
+	 * ⇒ 描述符逐字不等 ⇒
+	 * {@code InvalidInjectionException: Invalid descriptor ... Expected
+	 * (Lnet/minecraft/world/level/Level;FLmtr/data/TrainClient$SpeedCallback;...)V
+	 * but found (Ljava/lang/Object;FLjava/lang/Object;...)V}
+	 * <br>★ 危害比崩溃更隐蔽：该异常在**资源重载**时抛出 ⇒
+	 * {@code Caught error loading resourcepacks, removing all selected resourcepacks}
+	 * ⇒ MC 移除全部资源包并反复重试（实测循环 9 次）⇒ 用户看到「一直说重载资源失败」。
+	 * <br>修法：handler 参数改为精确类型，参数个数与目标一致（5 参）。
+	 * <br>（{@code require = 0} 只降级「注入点找不到」，<b>不</b>降级描述符不匹配 ⇒ 仍致命。）
 	 */
 	@Inject(method = "simulateTrain", at = @At("HEAD"), require = 0)
-	private void mtrultra$refreshSnapshot(Object world, float ticksElapsed, Object speedCallback, Object announcementCallback, Object lightRailAnnouncementCallback, CallbackInfo ci) {
+	private void mtrultra$refreshSnapshot(Level world, float ticksElapsed, TrainClient.SpeedCallback speedCallback,
+			TrainClient.AnnouncementCallback announcementCallback, TrainClient.AnnouncementCallback lightRailAnnouncementCallback,
+			CallbackInfo ci) {
 		final Minecraft client = Minecraft.getInstance();
 		final Player player = client.player;
 		mtrultra$cameraPos = client.gameRenderer.getMainCamera().getPosition();
@@ -69,13 +85,18 @@ public abstract class TrainClientMixin {
 
 	/**
 	 * simulateCar HEAD 剔除：超距且非乘坐列车时取消整段（音频+渲染+连接件）。
-	 * 参数表（15 参）按 TrainClient.simulateCar 的实际签名排列；
+	 * 参数表按 TrainClient.simulateCar 的实际签名排列（javap 实证 17 参）；
 	 * 前三个坐标参数用于距离判定。
-	 * [修复 2026-10-21] require = 0：MTR 升级导致签名变化时仅失效（不剔除），不崩客户端。
+	 *
+	 * <p><b>★ [1.1.8 真机修复]</b> 首参此前是 {@code Object world}，
+	 * 目标首参是 {@code Level} ⇒ 描述符逐字不等 ⇒
+	 * {@code InvalidInjectionException: Invalid descriptor} ⇒
+	 * 资源重载失败 → MC 移除全部资源包并反复重试。
+	 * 修法：全部参数改精确类型。
 	 */
 	@Inject(method = "simulateCar", at = @At("HEAD"), cancellable = true, require = 0)
 	private void mtrultra$cullDistantCar(
-			Object world, int ridingCar, float ticksElapsed,
+			Level world, int ridingCar, float ticksElapsed,
 			double carX, double carY, double carZ, float carYaw, float carPitch,
 			double prevCarX, double prevCarY, double prevCarZ, float prevCarYaw, float prevCarPitch,
 			boolean doorLeftOpen, boolean doorRightOpen, double realSpacing,
