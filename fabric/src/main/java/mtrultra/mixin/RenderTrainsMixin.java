@@ -1,6 +1,9 @@
 package mtrultra.mixin;
 
 import mtrultra.MtrUltraConfig;
+import mtr.entity.EntitySeat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -50,8 +53,19 @@ public abstract class RenderTrainsMixin {
 	// 实际签名（mtr-fabric-1.18.2 / mtr-fabric-1.19.4 / ymtr-fabric-1.19.2 /
 	// ymtr-fabric-1.20.1 四个目标 jar javap 验证一致）：
 	//   render(Lmtr/entity/EntitySeat;FLnet/minecraft/class_4587;Lnet/minecraft/class_4597;)V
+	//
+	// ★ [1.1.8] 改用 **Mojmap 描述符 + 成员级 remap=true**：
+	//   原因：handler 参数必须写精确类型（EntitySeat/PoseStack/MultiBufferSource），
+	//   否则描述符与 target 逐字不等 ⇒ InvalidInjectionException（1.1.7 真机崩）。
+	//   而 handler 的字节码描述符与 target 描述符**必须处于同一映射空间**：
+	//   本工程用 officialMojangMappings，编译期类型名是 Mojmap（PoseStack），
+	//   运行时却是 intermediary（class_4587）⇒ 两者都要走 refmap 转换。
+	//   成员级显式 remap=true 后，AP 会把
+	//   render(...Mojmap...) → render(...intermediary...) 写进 mtr-ultra.refmap.json，
+	//   运行时 mixin 经 refmap 还原后与生产 YMTR 字面签名精确命中。
+	//   ★ 类级 remap=false 会被成员继承 ⇒ 必须在这里显式 remap=true。
 	private static final String RENDER_STATIC =
-			"render(Lmtr/entity/EntitySeat;FLnet/minecraft/class_4587;Lnet/minecraft/class_4597;)V";
+			"render(Lmtr/entity/EntitySeat;FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;)V";
 
 	@Unique
 	private static final ThreadLocal<HashMap<UUID, Object>> MTRULTRA$REUSED_MAP = new ThreadLocal<>();
@@ -60,17 +74,39 @@ public abstract class RenderTrainsMixin {
 	 * render 入口：帧开始时清理复用容器（上一帧的去重表作废）。
 	 * 显式静态版签名（4 参）——render 有实例/静态两个重载，
 	 * 轨道渲染去重表只在静态版内。
+	 *
+	 * <p><b>★ [1.1.8 真机修复] 三处结构性错误</b>（1.1.7 真机启动即崩）：
+	 * <ol>
+	 *   <li><b>handler 用了 {@code Object} 占位</b> ⇒ 描述符
+	 *       {@code (Ljava/lang/Object;FLjava/lang/Object;Ljava/lang/Object;...)}V
+	 *       与 target 的 {@code (Lmtr/entity/EntitySeat;FLnet/minecraft/class_4587;
+	 *       Lnet/minecraft/class_4597;)V} <b>逐字不等</b> ⇒
+	 *       {@code InvalidInjectionException: Invalid descriptor}；
+	 *       <b>{@code require=0} 救不了</b>（它只降级「注入点找不到」，不降级描述符不匹配）。</li>
+	 *   <li><b>handler 是实例方法而 target 是 static</b> ⇒
+	 *       {@code InvalidInjectionException: 'static' modifier of handler method does not
+	 *       match target}。Mixin 的 {@code Injector.checkTargetModifiers} 会
+	 *       <b>直接抛异常</b>（字节码实证，mixin-0.8.5）。</li>
+	 *   <li><b>参数个数错</b>：target 是 4 参，handler 却写 5 参。</li>
+	 * </ol>
+	 * 修复：handler 必须 <b>static</b>，参数必须是 <b>精确类型</b>且个数与 target 一致。
+	 * <br>★ 静态字节码审计查不出这些：{@code (Object,float,Object,Object,CallbackInfo)}
+	 * 本身是合法字节码，且「非 static handler」在字节码层面完全合法。
+	 * <br>⇒ 必须真机 runClient 验证（见 docs/client-verification-boundary.md）。
 	 */
 	@Inject(
 			method = RENDER_STATIC,
 			at = @At("HEAD"),
+			// ★ [1.1.8] 成员级显式 remap=true：类级 remap=false 会被成员继承，
+			//   而本成员需要 Mojmap→intermediary 的 refmap 桥接。
+			remap = true,
 			// [修复 2026-10-22] 与 @Redirect 的降级策略一致：MTR 升级改签名时
 			// 注入失败仅告警不崩（require=0 下 U3 整体失效——若 @Redirect 成功
 			// 而 @Inject 失效会导致去重表跨帧残留，故两者必须同生共死，
 			// 见下方 @Redirect 的同款 require=0）。
 			require = 0
 	)
-	private void mtrultra$resetReusedMap(Object entity, float tickDelta, Object matrices, Object vertexConsumers, CallbackInfo ci) {
+	private static void mtrultra$resetReusedMap(EntitySeat entity, float tickDelta, PoseStack matrices, MultiBufferSource vertexConsumers, CallbackInfo ci) {
 		if (MtrUltraConfig.enableRailDedupNoAlloc) {
 			final HashMap<UUID, Object> map = MTRULTRA$REUSED_MAP.get();
 			if (map != null) {
@@ -88,6 +124,8 @@ public abstract class RenderTrainsMixin {
 	@org.spongepowered.asm.mixin.injection.Redirect(
 			method = RENDER_STATIC,
 			at = @At(value = "NEW", target = "Ljava/util/HashMap;<init>()V"),
+			// ★ [1.1.8] 同上：成员级显式 remap=true（Mojmap→intermediary 桥接）。
+			remap = true,
 			// [修复 2026-10-21] 原无 require，默认 require=1。
 			// @Redirect 不带 ordinal 时要求目标方法内**唯一**匹配；
 			// MTR 升级后只要多出一处 new HashMap()，注入就失败 ⇒ 直接崩客户端。

@@ -2,6 +2,7 @@ package mtrultra.mixin;
 
 import mtrultra.MtrUltraConfig;
 import mtrultra.util.ScheduleRebuildFlag;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -39,7 +40,14 @@ import java.util.Map;
 @Mixin(targets = "mtr.data.RailwayData", remap = false)
 public abstract class RailwayDataMixin {
 
+	// ★ [1.1.8 真机修复] 目标是 **private final** Map<Long, List<ScheduleEntry>>
+	// schedulesForPlatform（6 个目标 jar 逐一 javap 核实）。
+	// 本字段在 RailwayData **自身**（不是父类）⇒ @Shadow 能定位；
+	// 但目标带 final 标志，Mixin 校验规则要求 shadow 也要声明 @Final
+	// （否则报 "@Shadow target {}::{} is final but shadow is not decorated with @Final"）。
+	// 注意：Java 侧不能写 `final`（字段初始化会报错），final 语义由 @Final 注解承担。
 	@Shadow
+	@Final
 	private Map<Long, List<Object>> schedulesForPlatform;
 
 	@Unique

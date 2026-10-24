@@ -7,6 +7,7 @@ import mtr.path.PathData;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -55,14 +56,24 @@ public abstract class TrainServerMixin {
 	// "cannot reduce visibiliy of ... target method/field"（InvalidMixinException，
 	// 直接崩服/崩客户端）。AP 只在编译期给 warning，运行期才炸——必须写对。
 	// 可见性经 6 个目标 jar（MTR 3.2.2-hf1 / YMTR 3.6.x × fabric/forge）javap 逐一核对。
-	@Shadow
-	protected boolean isCurrentlyManual;
-
-	@Shadow
-	public List<PathData> path;
-
-	@Shadow
-	public abstract boolean isPlayerRiding(Player player);
+	//
+	// ★ [1.1.8 真机修复] 这两个成员此前**从未定位成功**（每个客户端/服务端启动都报
+	//   InvalidMixinException: @Shadow method isPlayerRiding ... was not located
+	//   in the target class mtr.data.TrainServer / mtr.data.TrainClient）：
+	//   Mixin 的 @Shadow 解析走 TargetClassContext.findMethod(Deque, desc)，
+	//   只遍历**目标类自身**的 classNode.methods，**不查父类**；
+	//   isPlayerRiding 与 path 都定义在父类 mtr.data.Train 上，TrainServer 只是继承。
+	//   ⇒ 对应功能（模拟节流的手动/乘坐判定、就近玩家距离判定）此前是空转。
+	//   修法：改用 @Mixin 到 mtr.data.Train 的 @Accessor（见 TrainAccessor）。
+	//   目标签名经 6 个目标 jar（MTR 3.2.2-hf1 / YMTR 3.6.x × fabric/forge）
+	//   逐一 javap 核实一致：
+	//     protected boolean isCurrentlyManual
+	//     public final List<PathData> path
+	//     public final boolean isPlayerRiding(Player)
+	@Unique
+	private boolean mtrultra$isManual() {
+		return ((TrainAccessor) this).mtrultra$isCurrentlyManual();
+	}
 
 	@Unique
 	private int mtrultra$simCounter = 0;
@@ -145,14 +156,14 @@ public abstract class TrainServerMixin {
 
 	@Unique
 	private boolean mtrultra$isManualOrRiding(Level world) {
-		if (isCurrentlyManual) {
+		if (mtrultra$isManual()) {
 			return true;
 		}
 		if (world == null) {
 			return false;
 		}
 		for (final Player player : world.players()) {
-			if (isPlayerRiding(player)) {
+			if (((TrainAccessor) this).mtrultra$isPlayerRiding(player)) {
 				return true;
 			}
 		}
@@ -161,6 +172,7 @@ public abstract class TrainServerMixin {
 
 	@Unique
 	private double mtrultra$nearestPlayerDistSq(Level world) {
+		final List<PathData> path = ((TrainAccessor) this).mtrultra$getPath();
 		if (world == null || path == null || path.isEmpty()) {
 			return 0; // 无法定位时视为近距离（不降频，保守）
 		}

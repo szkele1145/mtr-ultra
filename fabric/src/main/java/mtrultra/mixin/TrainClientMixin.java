@@ -6,7 +6,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -31,14 +30,27 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(targets = "mtr.data.TrainClient", remap = false)
 public abstract class TrainClientMixin {
 
-	@Shadow
-	public abstract boolean isPlayerRiding(Player player);
-
+	// ★ [1.1.8 真机修复] 此前用 `@Shadow public abstract boolean isPlayerRiding(Player)`
+	//   **从未定位成功**，每个客户端启动都报：
+	//     InvalidMixinException: @Shadow method isPlayerRiding in mtr-ultra.mixins.json:TrainClientMixin
+	//       from mod mtr-turbo was not located in the target class mtr.data.TrainClient
+	//   根因：Mixin 的 @Shadow 解析走 TargetClassContext.findMethod(Deque, desc)，
+	//   只遍历**目标类自身**的 classNode.methods，**不查父类**；
+	//   isPlayerRiding 定义在父类 mtr.data.Train 上，TrainClient 只是继承它。
+	//   ⇒ 该 mixin 整个失效，车厢级剔除从未生效。
+	//   修法：改用 @Mixin 到 mtr.data.Train 的 @Accessor（见 TrainAccessor），
+	//   再经普通继承调用。
 	@Unique
 	private Vec3 mtrultra$cameraPos = Vec3.ZERO;
 
 	@Unique
 	private boolean mtrultra$playerRiding = false;
+
+	/** 读父类 Train 的 isPlayerRiding（@Invoker 桥接，见 TrainAccessor） */
+	@Unique
+	private boolean mtrultra$isPlayerRiding(Player player) {
+		return ((TrainAccessor) this).mtrultra$isPlayerRiding(player);
+	}
 
 	/**
 	 * TrainClient.simulateTrain 入口：刷新列车级剔除快照（每帧一次）。
@@ -52,7 +64,7 @@ public abstract class TrainClientMixin {
 		final Minecraft client = Minecraft.getInstance();
 		final Player player = client.player;
 		mtrultra$cameraPos = client.gameRenderer.getMainCamera().getPosition();
-		mtrultra$playerRiding = player != null && isPlayerRiding(player);
+		mtrultra$playerRiding = player != null && mtrultra$isPlayerRiding(player);
 	}
 
 	/**
