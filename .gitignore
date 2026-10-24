@@ -14,3 +14,5 @@ release-*/
 
 # 构建日志（本地临时产物）
 build-*.log
+logs/
+run/
