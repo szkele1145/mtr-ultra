@@ -52,6 +52,16 @@ public abstract class RailPositionCacheMixin {
 	 * Found unexpected argument type java.lang.Object at index 0, expected mtr.data.Rail}
 	 * ⇒ 资源重载失败 → MC 移除全部资源包并反复重试。
 	 * 修法：首参改精确类型 {@code Rail}（编译期 loom 的 modImplementation 提供该类）。
+	 *
+	 * <p><b>★ [1.1.8 二次修复] 该缓存默认已关闭</b>（见 MtrUltraConfig）。
+	 * 原因：数值对拍（{@code tools/RailPositionParity.java}，gradle 任务
+	 * {@code railPositionParity}）证明「等弧长采样 + 线性插值」与上游
+	 * {@code Rail.getPosition} <b>不等价</b>（4221 点，maxAbsDiff = 1.92 格）——
+	 * 上游内部按 tStart1/tEnd1、tStart2/tEnd2 <b>两段不连续的参数区间</b>求值，
+	 * 「沿轨道等距采样再插值」的前提不成立。
+	 * ⇒ 1.1.8 之前该 mixin 从未生效（handler 描述符错 ⇒ 静默失效），
+	 * 修好注入后它真正生效 ⇒ 轨道位置错位 1.92 格 ⇒「轨道没了 / 连不上」。
+	 * <br>⇒ 默认关闭（走上游原样计算）；要重新启用必须先让 railPositionParity 全绿。
 	 */
 	@Redirect(
 			method = "getRoutePosition",
@@ -70,9 +80,10 @@ public abstract class RailPositionCacheMixin {
 			samples = mtrturbo$buildSamples(rail);
 			cache.put(rail, samples);
 		}
-		// progress 越界钳制（原方法 progress>=0 由调用方 Math.max 保证，上界防御）
-		final double len = samples.length * STEP;
-		final double p = progress < 0 ? 0 : Math.min(progress, len - STEP);
+		// progress 越界钳制（上界用**真实长度**而非 samples.length*STEP——
+		// 后者比真实长度多一个 STEP，会让 idx 越过轨道末端）
+		final double len = mtrturbo$realLength(rail);
+		final double p = progress < 0 ? 0 : Math.min(progress, len);
 		final int idx = (int) (p / STEP);
 		final double frac = (p - idx * STEP) / STEP;
 		final Vec3 a = samples[idx];
@@ -83,6 +94,11 @@ public abstract class RailPositionCacheMixin {
 				a.y + (b.y - a.y) * frac,
 				a.z + (b.z - a.z) * frac
 		);
+	}
+
+	/** 轨道真实长度（= 采样点数 × 步长的上界修正：samples 末点对应真实长度） */
+	private static double mtrturbo$realLength(Rail rail) {
+		return rail.getLength();
 	}
 
 	private static Vec3[] mtrturbo$buildSamples(mtr.data.Rail rail) {

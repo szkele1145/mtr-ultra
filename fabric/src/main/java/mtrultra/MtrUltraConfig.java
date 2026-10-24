@@ -24,7 +24,23 @@ public class MtrUltraConfig {
     public static boolean enableRailDedupNoAlloc = true;
 
     // [0.3.0 / U6] Rail.getPosition 曲率缓存（0.25 格步长插值，视觉不可辨）
-    public static boolean enableRailPositionCache = true;
+    //
+    // ★ [1.1.8] **默认改为 false**。
+    //
+    // 原因：该 mixin 在 1.1.8 之前**从未生效**（handler 参数用 Object 占位 ⇒
+    // 描述符不匹配 ⇒ 静默失效），所以「0.25 格等距采样 + 线性插值」这个
+    // 前提从未被验证过。1.1.8 修好注入后它真正生效，随即暴露出
+    // **与上游 Rail.getPosition 语义不符**：
+    //   上游 getPosition(progress) 内部按 tStart1/tEnd1、tStart2/tEnd2 **两段
+    //   参数区间**求值（t = clamp(progress, 0, len1+len2)，再按 t<=len1 分段），
+    //   两段的参数区间**不连续** ⇒ 「沿轨道等弧长采样再线性插值」不成立。
+    //   数值对拍（tools/RailPositionParity.java，gradle 任务 railPositionParity）：
+    //   4221 个对拍点、maxAbsDiff = **1.92 格**（> 0.5 格容差）⇒ 轨道位置错位，
+    //   表现为「轨道没了 / 连不上」。
+    //
+    // 处置：默认关闭（走上游原样计算，行为 100% 正确）。
+    // 若将来要重新启用，必须先让 railPositionParity 任务全绿。
+    public static boolean enableRailPositionCache = false;
 
     // U4: 服务端模拟 LOD（近=每tick，中≤256格=每2tick，远=每4tick）
     public static boolean enableSimulationLod = true;

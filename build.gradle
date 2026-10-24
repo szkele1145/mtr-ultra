@@ -257,3 +257,42 @@ tasks.register('auditMixinRefs') {
 	description = 'fabric + forge 两侧 mixin 引用审计的聚合入口'
 	dependsOn 'auditMixinRefsFabric', 'auditMixinRefsForge'
 }
+
+// ───────────────────────────────────────────────────────────────────────────
+// [1.1.8] U6「Rail.getPosition 曲率缓存」数值对拍。
+//
+// 该 mixin 在 1.1.8 之前从未生效（handler 参数用 Object 占位 ⇒ 描述符不匹配
+// ⇒ 静默失效），所以它的插值误差从未被验证过；1.1.8 修好后真正生效，
+// 必须证明「预采样 + 线性插值」与上游 Rail.getPosition 等价。
+// ───────────────────────────────────────────────────────────────────────────
+tasks.register('railPositionParity', JavaExec) {
+	group = 'verification'
+	description = 'U6 轨道曲率缓存 vs 上游 Rail.getPosition 数值对拍'
+
+	def srcFile = file('tools/RailPositionParity.java')
+	def outDir = layout.buildDirectory.dir("verify-rail-parity").get().asFile
+
+	inputs.file(srcFile)
+	outputs.dir(outDir)
+
+	doFirst {
+		outDir.mkdirs()
+		def compiler = javax.tools.ToolProvider.getSystemJavaCompiler()
+		if (compiler == null) {
+			throw new GradleException('需要 JDK（不是 JRE）来编译 RailPositionParity.java')
+		}
+		def fm = compiler.getStandardFileManager(null, null, null)
+		def units = fm.getJavaFileObjects(srcFile)
+		def opts = ['-d', outDir.absolutePath, '-encoding', 'UTF-8', '-nowarn'] as List
+		// classpath 用本工程的 compileClasspath：含 MC（Mojmap）与 YMTR
+		opts += ['-cp', sourceSets.main.compileClasspath.asPath]
+		def compilerTask = compiler.getTask(null, fm, null, opts, null, units)
+		def ok = compilerTask.call()
+		fm.close()
+		if (!ok) throw new GradleException('RailPositionParity.java 编译失败')
+		classpath = files(outDir) + sourceSets.main.runtimeClasspath
+	}
+
+	mainClass = 'RailPositionParity'
+	jvmArgs '-Dfile.encoding=UTF-8', '-Dsun.jnu.encoding=UTF-8'
+}
